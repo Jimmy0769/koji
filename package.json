@@ -1,0 +1,27 @@
+{
+  "name": "koji",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "dev": "vite --host 127.0.0.1",
+    "build": "vite build",
+    "tauri": "node scripts/tauri.mjs",
+    "test": "node --test"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@tauri-apps/api": "^2.12.5",
+    "@tauri-apps/cli": "^2.12.6",
+    "vite": "^8.3.8"
+  },
+  "type": "module",
+  "devDependencies": {
+    "prettier": "^3.10.1"
+  }
+}

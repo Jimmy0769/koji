@@ -1,0 +1,1854 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>koji · 原型图 v0.2</title>
+<style>
+:root{
+  --bg:#eceef4;
+  --surface:#ffffff;
+  --surface-2:#f7f8fb;
+  --line:#e5e8ef;
+  --line-soft:#eef0f5;
+  --text:#1e2330;
+  --text-2:#6a7183;
+  --text-3:#9ba2b2;
+  --accent:#5b6ef5;
+  --accent-2:#7c8bff;
+  --accent-soft:#eef0fe;
+  --run:#22c55e;
+  --run-soft:#e9f9ef;
+  --pause:#f0a020;
+  --pause-soft:#fdf3e2;
+  --idle:#a8b0bd;
+  --idle-soft:#f0f1f5;
+  --danger:#ef4444;
+  --shadow:0 16px 36px rgba(24,32,58,.13), 0 3px 8px rgba(24,32,58,.06);
+  --shadow-sm:0 4px 14px rgba(24,32,58,.10);
+  --radius:14px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;scroll-padding-top:76px}
+body{
+  font-family:"Segoe UI","Microsoft YaHei UI","Microsoft YaHei",system-ui,-apple-system,sans-serif;
+  background:var(--bg);color:var(--text);font-size:14px;line-height:1.6;
+  -webkit-font-smoothing:antialiased;
+  background-image:radial-gradient(circle at 12% 0%,#e3e7ff 0,transparent 42%),
+                   radial-gradient(circle at 88% 8%,#e2f4ff 0,transparent 38%);
+  background-attachment:fixed;
+}
+
+/* ---------- 页头 ---------- */
+.page-head{padding:44px 40px 26px;max-width:1360px;margin:0 auto}
+.page-head h1{font-size:30px;font-weight:650;letter-spacing:-.4px;display:flex;align-items:center;gap:12px}
+.page-head h1 .logo{
+  width:40px;height:40px;border-radius:11px;display:grid;place-items:center;font-size:20px;
+  background:linear-gradient(135deg,var(--accent),#8b5cf6);color:#fff;
+  box-shadow:0 6px 16px rgba(91,110,245,.36);
+}
+.page-head .meta{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.chip{
+  display:inline-flex;align-items:center;gap:6px;font-size:12.5px;color:var(--text-2);
+  background:rgba(255,255,255,.8);border:1px solid var(--line);border-radius:999px;padding:4px 12px;
+  backdrop-filter:blur(6px);
+}
+.chip b{color:var(--text);font-weight:600}
+.chip.accent{background:var(--accent-soft);border-color:#d9deff;color:#4451c4}
+
+/* ---------- 导航 ---------- */
+.toc{
+  position:sticky;top:0;z-index:40;background:rgba(252,253,255,.86);backdrop-filter:blur(14px);
+  border-bottom:1px solid var(--line);
+}
+.toc-inner{max-width:1360px;margin:0 auto;padding:0 40px;display:flex;gap:4px;overflow-x:auto}
+.toc a{
+  display:block;padding:15px 14px;font-size:13.5px;color:var(--text-2);text-decoration:none;
+  border-bottom:2px solid transparent;white-space:nowrap;transition:.15s;
+}
+.toc a:hover{color:var(--accent);background:var(--accent-soft)}
+.toc a span{color:var(--text-3);font-size:11.5px;margin-right:6px;font-variant-numeric:tabular-nums}
+
+/* ---------- 版块 ---------- */
+main{max-width:1360px;margin:0 auto;padding:0 40px 100px}
+section{padding-top:54px}
+.sec-head{margin-bottom:26px}
+.sec-head h2{font-size:21px;font-weight:640;letter-spacing:-.2px;display:flex;align-items:center;gap:10px}
+.sec-head h2::before{content:"";width:4px;height:19px;border-radius:2px;background:linear-gradient(var(--accent),#8b5cf6)}
+.sec-head p{color:var(--text-2);font-size:13.5px;margin-top:8px;margin-left:14px;max-width:900px}
+.sec-head code{background:#fff;border:1px solid var(--line);border-radius:5px;padding:1px 6px;font-size:12.5px;color:#4451c4}
+
+.stage{
+  background:rgba(255,255,255,.5);border:1px solid var(--line);border-radius:20px;padding:38px 30px;
+  display:flex;flex-wrap:wrap;gap:38px;align-items:flex-start;justify-content:center;
+}
+.frame-cell{display:flex;flex-direction:column;align-items:center;gap:12px}
+.frame-label{font-size:12.5px;color:var(--text-2);display:flex;align-items:center;gap:7px}
+.frame-label .dot{width:8px;height:8px;border-radius:50%}
+.frame-label small{color:var(--text-3);font-size:11.5px}
+.note{
+  font-size:12px;color:var(--text-3);margin-top:-2px;text-align:center;max-width:440px;
+}
+.note b{color:var(--text-2);font-weight:600}
+
+/* ---------- 窗口外壳 ---------- */
+.win{
+  width:420px;background:var(--surface);border-radius:var(--radius);box-shadow:var(--shadow);
+  border:1px solid rgba(20,26,45,.07);overflow:hidden;position:relative;
+}
+.win.mini-shell{width:220px;border-radius:12px}
+.titlebar{
+  height:46px;display:flex;align-items:center;padding:0 6px 0 15px;
+  border-bottom:1px solid var(--line);background:linear-gradient(#ffffff,#fbfbfe);
+  cursor:default;gap:9px;
+}
+.titlebar .app-name{font-size:13px;font-weight:600;display:flex;align-items:center;gap:7px;flex:1}
+.titlebar .app-name .ico{font-size:15px}
+.win-btn{
+  width:30px;height:30px;border-radius:7px;border:none;background:transparent;color:var(--text-2);
+  font-size:13px;cursor:pointer;display:grid;place-items:center;transition:.14s;font-family:inherit;
+}
+.win-btn:hover{background:var(--surface-2);color:var(--text)}
+.win-btn.on{background:var(--accent-soft);color:var(--accent)}
+.win-btn.close:hover{background:var(--danger);color:#fff}
+.win-btn.pin.on{background:#fff4e0;color:#e08a0b}
+
+/* ---------- 倒计时区 ---------- */
+.timer-zone{padding:26px 24px 18px;display:flex;flex-direction:column;align-items:center;position:relative}
+.ring-wrap{position:relative;width:206px;height:206px;display:grid;place-items:center}
+.ring{position:absolute;inset:0;transform:rotate(-90deg)}
+.ring circle{fill:none;stroke-linecap:round}
+.ring .track{stroke:var(--line-soft);stroke-width:9}
+.ring .bar{stroke:var(--accent);stroke-width:9;transition:stroke-dashoffset .4s linear,stroke .3s}
+.ring.running .bar{stroke:var(--run)}
+.ring.paused .bar{stroke:var(--pause)}
+.ring.idle .bar{stroke:#cfd5e2}
+.time-read{
+  font-size:52px;font-weight:300;letter-spacing:-1px;font-variant-numeric:tabular-nums;
+  color:var(--text);line-height:1;position:relative;z-index:1;
+}
+.ring.idle .time-read{color:var(--text-3)}
+.state-tag{
+  margin-top:12px;font-size:12px;font-weight:600;letter-spacing:.4px;padding:3px 12px;border-radius:999px;
+}
+.state-tag.idle{background:var(--idle-soft);color:var(--text-2)}
+.state-tag.running{background:var(--run-soft);color:#12884a}
+.state-tag.paused{background:var(--pause-soft);color:#b06f08}
+.sub-line{font-size:12px;color:var(--text-3);margin-top:9px;font-variant-numeric:tabular-nums}
+
+/* ---------- 时长选择 ---------- */
+.duration-row{display:flex;gap:8px;align-items:center;padding:0 24px 6px;flex-wrap:wrap;justify-content:center}
+.duration-row .lab{font-size:12.5px;color:var(--text-3);margin-right:2px}
+.chip-btn{
+  border:1px solid var(--line);background:#fff;border-radius:9px;padding:6px 13px;font-size:12.5px;
+  color:var(--text-2);cursor:pointer;transition:.14s;font-family:inherit;font-variant-numeric:tabular-nums;
+}
+.chip-btn:hover{border-color:#c3caf5;color:var(--accent)}
+.chip-btn.sel{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:600;box-shadow:0 4px 10px rgba(91,110,245,.3)}
+.chip-btn[disabled]{opacity:.42;cursor:not-allowed;box-shadow:none}
+.chip-btn[disabled].sel{background:var(--accent);border-color:var(--accent)}
+
+/* ---------- 主按钮 ---------- */
+.action-row{display:flex;gap:10px;justify-content:center;padding:16px 24px 22px;position:relative}
+.btn{
+  border:none;border-radius:11px;font-family:inherit;font-size:14px;font-weight:600;cursor:pointer;
+  padding:12px 30px;transition:.16s;display:inline-flex;align-items:center;gap:8px;
+}
+.btn:active{transform:translateY(1px)}
+.btn.primary{background:linear-gradient(135deg,var(--accent),#7480ff);color:#fff;box-shadow:0 6px 16px rgba(91,110,245,.34)}
+.btn.primary:hover{box-shadow:0 9px 22px rgba(91,110,245,.42)}
+.btn.primary.run{background:linear-gradient(135deg,#22c55e,#37d67a);box-shadow:0 6px 16px rgba(34,197,94,.32)}
+.btn.ghost{background:#fff;border:1px solid var(--line);color:var(--text-2)}
+.btn.ghost:hover{border-color:#c9cfda;color:var(--text)}
+.btn.ghost.danger{color:#d93b3b;border-color:#f2cfcf}
+.btn.ghost.danger:hover{background:#fef2f2;border-color:#f0b4b4}
+.btn.lg{padding:13px 38px}
+
+/* ---------- 记录区 ---------- */
+.records{border-top:1px solid var(--line);background:var(--surface-2);padding:16px 20px 20px}
+.records-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.records-head .t{font-size:13px;font-weight:640;display:flex;align-items:center;gap:7px}
+.records-head .t .cnt{
+  background:#fff;border:1px solid var(--line);border-radius:999px;font-size:11px;
+  padding:0 8px;line-height:18px;color:var(--text-2);font-variant-numeric:tabular-nums;
+}
+.records-head .ops{display:flex;gap:4px}
+.day-group{font-size:11.5px;color:var(--text-3);margin:12px 2px 7px;display:flex;align-items:center;gap:8px}
+.day-group::after{content:"";flex:1;height:1px;background:var(--line)}
+.day-group:first-child{margin-top:0}
+.rec{
+  background:#fff;border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin-bottom:8px;
+  display:flex;gap:10px;transition:.15s;
+}
+.rec:hover{border-color:#cfd6e8;box-shadow:var(--shadow-sm)}
+.rec .mark{font-size:13px;line-height:20px;flex:none}
+.rec .body{flex:1;min-width:0}
+.rec .r1{display:flex;align-items:baseline;gap:9px}
+.rec .rtime{font-size:12.5px;color:var(--text-2);font-variant-numeric:tabular-nums}
+.rec .rdur{font-size:12.5px;font-weight:640;font-variant-numeric:tabular-nums}
+.rec .rdur.done{color:#12884a}
+.rec .rdur.abort{color:#c2760a}
+.rec .tail{margin-left:auto;font-size:12px;color:var(--text-3);opacity:0;transition:.15s;cursor:pointer}
+.rec:hover .tail{opacity:1}
+.rec .tail:hover{color:var(--danger)}
+.rec .rtext{
+  font-size:12.5px;color:var(--text-2);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.rec .rtext.empty{color:var(--text-3);font-style:italic}
+
+/* ---------- 弹窗 ---------- */
+.overlay{
+  position:absolute;inset:0;background:rgba(26,32,50,.42);backdrop-filter:blur(2px);
+  display:grid;place-items:center;padding:20px;z-index:20;
+}
+.overlay.hide{display:none}
+.dialog{
+  background:#fff;border-radius:15px;width:100%;max-width:330px;box-shadow:0 22px 50px rgba(16,22,40,.3);
+  overflow:hidden;animation:pop .18s ease-out;
+}
+@keyframes pop{from{transform:scale(.94);opacity:0}to{transform:scale(1);opacity:1}}
+.dialog .dhead{padding:18px 20px 4px;font-size:15px;font-weight:650;display:flex;align-items:center;gap:8px}
+.dialog .dbody{padding:12px 20px 6px}
+.dialog .dmeta{
+  background:var(--surface-2);border:1px solid var(--line-soft);border-radius:9px;padding:10px 12px;
+  font-size:12.5px;color:var(--text-2);display:flex;flex-direction:column;gap:5px;
+}
+.dialog .dmeta .row{display:flex;justify-content:space-between}
+.dialog .dmeta .row b{color:var(--text);font-weight:600;font-variant-numeric:tabular-nums}
+.dialog label.fl{display:block;font-size:12.5px;color:var(--text-2);margin:14px 0 6px}
+.dialog textarea,.dialog input.txt{
+  width:100%;border:1px solid var(--line);border-radius:9px;padding:9px 11px;font-family:inherit;
+  font-size:13px;resize:none;color:var(--text);background:#fdfdff;transition:.15s;
+}
+.dialog textarea{height:76px;line-height:1.5}
+.dialog textarea:focus,.dialog input.txt:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft);background:#fff}
+.dialog .cfoot{display:flex;gap:9px;padding:16px 20px 20px}
+.dialog .cfoot .btn{flex:1;justify-content:center;padding:10px 0;font-size:13.5px}
+.counter{font-size:11px;color:var(--text-3);text-align:right;margin-top:5px;font-variant-numeric:tabular-nums}
+
+/* 迷你弹窗 */
+.dialog.compact{max-width:212px;border-radius:12px}
+.dialog.compact .dhead{font-size:12.5px;padding:12px 13px 2px}
+.dialog.compact .dbody{padding:8px 13px 0}
+.dialog.compact .dmeta{padding:7px 9px;font-size:11px;border-radius:7px;gap:3px}
+.dialog.compact textarea{height:44px;font-size:12px;padding:7px 9px}
+.dialog.compact .cfoot{padding:10px 13px 13px;gap:7px}
+.dialog.compact .cfoot .btn{padding:7px 0;font-size:12px;border-radius:8px}
+
+/* 提示气泡 */
+.toast{
+  position:absolute;left:50%;bottom:22px;transform:translateX(-50%);
+  background:rgba(30,36,52,.93);color:#fff;font-size:12.5px;padding:9px 16px;border-radius:9px;
+  box-shadow:0 10px 24px rgba(16,22,40,.3);display:flex;align-items:center;gap:8px;z-index:25;
+  white-space:nowrap;animation:slideup .22s ease-out;
+}
+@keyframes slideup{from{transform:translate(-50%,10px);opacity:0}to{transform:translate(-50%,0);opacity:1}}
+.toast.hide{display:none}
+.toast .ic{font-size:13px}
+
+/* 中止二次确认气泡 */
+.confirm-pop{
+  position:absolute;background:#fff;border-radius:11px;box-shadow:0 16px 34px rgba(16,22,40,.24);
+  border:1px solid var(--line);padding:14px 15px;width:206px;z-index:22;animation:pop .16s ease-out;
+}
+.confirm-pop .q{font-size:12.5px;color:var(--text);margin-bottom:11px;display:flex;gap:7px;align-items:flex-start}
+.confirm-pop .q .em{font-size:14px}
+.confirm-pop .cp-foot{display:flex;gap:7px}
+.confirm-pop .cp-foot .btn{flex:1;justify-content:center;padding:7px 0;font-size:12.5px;border-radius:8px}
+.confirm-pop::after{
+  content:"";position:absolute;bottom:-6px;left:50%;margin-left:-6px;width:11px;height:11px;
+  background:#fff;border-right:1px solid var(--line);border-bottom:1px solid var(--line);transform:rotate(45deg);
+}
+.confirm-pop.hide{display:none}
+
+/* ---------- 小视图 ---------- */
+.mini{
+  width:220px;height:90px;background:#fff;border-radius:12px;box-shadow:var(--shadow);
+  border:1px solid rgba(20,26,45,.08);position:relative;overflow:hidden;
+}
+.mini.ontop{border-color:#bfc8f5;box-shadow:0 16px 36px rgba(91,110,245,.26),0 0 0 1px rgba(91,110,245,.18)}
+.mini-body{padding:9px 11px 0}
+.mini-top{display:flex;align-items:center;gap:7px}
+.mini .dotst{width:8px;height:8px;border-radius:50%;flex:none;background:var(--idle);transition:.2s}
+.mini .dotst.running{background:var(--run);box-shadow:0 0 0 3px var(--run-soft)}
+.mini .dotst.paused{background:var(--pause);box-shadow:0 0 0 3px var(--pause-soft);animation:blink 1.2s infinite}
+@keyframes blink{50%{opacity:.4}}
+.mini-time{font-size:23px;font-weight:600;font-variant-numeric:tabular-nums;letter-spacing:-.5px;line-height:1.1;flex:1}
+.mini-time.idle{color:var(--text-3)}
+.mini-pin{
+  width:22px;height:22px;border-radius:6px;border:none;background:transparent;color:var(--text-3);
+  cursor:pointer;font-size:11px;display:grid;place-items:center;transition:.15s;
+}
+.mini-pin.on{background:#fff4e0;color:#e08a0b}
+.mini-pin:hover{background:var(--surface-2)}
+.mini-bar{height:3px;border-radius:2px;background:var(--line-soft);margin:6px 0 0;overflow:hidden}
+.mini-bar i{display:block;height:100%;background:var(--run);border-radius:2px;transition:width .4s linear}
+.mini-bar i.paused{background:var(--pause)}
+.mini-bar i.idle{background:#cfd5e2}
+.mini-btns{display:flex;gap:6px;margin-top:8px}
+.mini-btns button{
+  flex:1;border:none;border-radius:7px;font-family:inherit;font-size:11.5px;font-weight:600;
+  padding:5px 0;cursor:pointer;transition:.14s;
+}
+.mb-start{background:linear-gradient(135deg,var(--accent),#7480ff);color:#fff}
+.mb-run{background:var(--run-soft);color:#12884a}
+.mb-run:hover{background:#d7f3e3}
+.mb-stop{background:#f5f6f9;color:#6a7183}
+.mb-stop:hover{background:#fdecec;color:#d93b3b}
+
+/* 缩放展示小视图 */
+.zoom16{width:352px;height:144px;position:relative}
+.zoom16 .mini{transform:scale(1.6);transform-origin:top left}
+
+/* ---------- 概览卡片 ---------- */
+.grid-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px}
+.card{
+  background:#fff;border:1px solid var(--line);border-radius:14px;padding:18px 20px;box-shadow:0 2px 10px rgba(24,32,58,.05);
+}
+.card h3{font-size:14px;font-weight:640;margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.card h3 .n{
+  width:22px;height:22px;border-radius:7px;background:var(--accent-soft);color:var(--accent);
+  display:grid;place-items:center;font-size:11.5px;font-weight:700;
+}
+.card ul{list-style:none;display:flex;flex-direction:column;gap:7px}
+.card li{font-size:12.5px;color:var(--text-2);padding-left:15px;position:relative;line-height:1.55}
+.card li::before{content:"";position:absolute;left:3px;top:7px;width:5px;height:5px;border-radius:50%;background:#c8cee0}
+.card li b{color:var(--text);font-weight:600}
+.card li .k{color:var(--accent);font-weight:600}
+
+/* 规则表 */
+.rules{display:flex;flex-direction:column;gap:10px}
+.rule{
+  display:flex;gap:12px;align-items:flex-start;background:#fff;border:1px solid var(--line);
+  border-left:3px solid var(--accent);border-radius:10px;padding:13px 16px;
+}
+.rule.warn{border-left-color:var(--pause)}
+.rule.ok{border-left-color:var(--run)}
+.rule .rt{font-size:12.5px;font-weight:650;flex:none;width:96px;color:var(--text)}
+.rule .rd{font-size:12.5px;color:var(--text-2);line-height:1.6}
+.rule .rd code{background:var(--accent-soft);color:#4451c4;border-radius:5px;padding:1px 6px;font-size:12px}
+
+/* 状态机 */
+.fsm{background:#fff;border:1px solid var(--line);border-radius:16px;padding:26px;overflow-x:auto}
+.fsm svg{display:block;margin:0 auto;min-width:720px}
+.fsm-legend{display:flex;gap:18px;flex-wrap:wrap;justify-content:center;margin-top:18px;font-size:12px;color:var(--text-2)}
+.fsm-legend i{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:6px}
+
+/* 表格 */
+.tbl{width:100%;border-collapse:separate;border-spacing:0;background:#fff;border:1px solid var(--line);border-radius:12px;overflow:hidden;font-size:12.5px}
+.tbl th{background:var(--surface-2);text-align:left;padding:11px 15px;font-weight:640;color:var(--text-2);font-size:12px;border-bottom:1px solid var(--line)}
+.tbl td{padding:11px 15px;border-bottom:1px solid var(--line-soft);color:var(--text-2);vertical-align:top}
+.tbl tr:last-child td{border-bottom:none}
+.tbl td b{color:var(--text);font-weight:600}
+.tbl code{background:var(--accent-soft);color:#4451c4;border-radius:4px;padding:1px 5px;font-size:11.5px}
+
+/* ---------- 交互演示台 ---------- */
+.desk{
+  background:linear-gradient(150deg,#2b3350,#1e2438 60%,#232a42);border-radius:20px;padding:44px 30px 54px;
+  display:flex;flex-direction:column;align-items:center;gap:22px;position:relative;overflow:hidden;
+  border:1px solid rgba(255,255,255,.07);
+}
+.desk::before{
+  content:"";position:absolute;inset:0;opacity:.5;
+  background-image:radial-gradient(circle at 20% 20%,rgba(91,110,245,.3),transparent 45%),
+                   radial-gradient(circle at 82% 75%,rgba(139,92,246,.24),transparent 42%);
+}
+.desk>*{position:relative;z-index:1}
+.desk-hint{color:#aab3cc;font-size:12.5px;display:flex;gap:18px;flex-wrap:wrap;justify-content:center;align-items:center}
+.desk-hint .kbd{
+  background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.16);border-radius:6px;
+  padding:1px 7px;font-size:11.5px;color:#dfe4f2;
+}
+.desk-controls{display:flex;gap:14px;flex-wrap:wrap;justify-content:center;align-items:center}
+.switch{
+  display:inline-flex;align-items:center;gap:9px;color:#c3cade;font-size:12.5px;cursor:pointer;
+  background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.13);border-radius:9px;padding:7px 13px;
+  transition:.15s;
+}
+.switch:hover{background:rgba(255,255,255,.12)}
+.switch input{accent-color:var(--accent);cursor:pointer}
+.desk-help{color:#8e98b4;font-size:11.5px;text-align:center;max-width:620px;line-height:1.7}
+
+footer{max-width:1360px;margin:0 auto;padding:30px 40px 60px;color:var(--text-3);font-size:12px;text-align:center}
+
+@media (max-width:900px){
+  .page-head,main,.toc-inner,footer{padding-left:18px;padding-right:18px}
+  .stage{padding:24px 12px}
+  .win{width:100%;max-width:420px}
+}
+/* ---------- unslop pass: quiet timer desk ---------- */
+:root{
+  --bg:#f2f1ed;
+  --surface:#fffefa;
+  --surface-2:#f7f5f0;
+  --line:#dedbd3;
+  --line-soft:#ece9e1;
+  --text:#252824;
+  --text-2:#666b64;
+  --text-3:#92978e;
+  --accent:#536b5b;
+  --accent-2:#718474;
+  --accent-soft:#e9eee9;
+  --run:#3d7a58;
+  --run-soft:#e8f1ea;
+  --pause:#a87532;
+  --pause-soft:#f5ecde;
+  --idle:#92978e;
+  --idle-soft:#efeee9;
+  --danger:#b64e45;
+  --shadow:0 10px 24px rgba(40,43,38,.09),0 2px 5px rgba(40,43,38,.05);
+  --shadow-sm:0 3px 10px rgba(40,43,38,.07);
+  --radius:12px;
+}
+body{background:var(--bg);background-image:none;color:var(--text)}
+.page-head{padding:40px 40px 24px}
+.page-head h1{font-weight:500;letter-spacing:0}
+.page-head h1 .logo{background:var(--accent);box-shadow:none;border-radius:10px}
+.chip{background:var(--surface);backdrop-filter:none;border-radius:8px;padding:4px 10px}
+.chip.accent{background:var(--accent-soft);border-color:#d5dfd6;color:#405846}
+.toc{background:rgba(255,254,250,.96);backdrop-filter:none}
+.toc a{transition:color .15s,background-color .15s}
+.toc a:hover{color:var(--accent);background:var(--accent-soft)}
+.sec-head h2{font-weight:500;letter-spacing:0}
+.sec-head h2::before{background:var(--accent);border-radius:1px}
+.stage{background:rgba(255,254,250,.72);border-radius:16px;padding:32px 28px;gap:32px}
+.win{border-radius:12px;box-shadow:var(--shadow)}
+.titlebar{background:var(--surface);}
+.win-btn{transition:color .15s,background-color .15s}
+.ring .bar{transition:stroke-dashoffset .4s linear,stroke .3s}
+.time-read{letter-spacing:0;font-weight:400}
+.state-tag{letter-spacing:0;border-radius:7px;padding:3px 10px}
+.chip-btn{transition:color .15s,border-color .15s,background-color .15s}
+.chip-btn.sel{background:var(--accent);border-color:var(--accent);box-shadow:none}
+.btn{border-radius:9px;transition:color .15s,background-color .15s,border-color .15s,transform .1s}
+.btn.primary{background:var(--accent);box-shadow:none}
+.btn.primary:hover{box-shadow:none;background:#46604f}
+.btn.primary.run{background:var(--run);box-shadow:none}
+.records{background:var(--surface-2)}
+.records-head .t{font-weight:500}
+.records-head .t .cnt{border-radius:7px}
+.rec{border-radius:8px;transition:border-color .15s,box-shadow .15s}
+.rec:hover{box-shadow:var(--shadow-sm)}
+.rec .tail{opacity:1;transition:color .15s}
+.overlay{backdrop-filter:none}
+.dialog{border-radius:12px;box-shadow:var(--shadow)}
+.dialog textarea:focus,.dialog input.txt:focus{box-shadow:0 0 0 3px var(--accent-soft)}
+.mini{border-radius:10px;box-shadow:var(--shadow)}
+.mini.ontop{box-shadow:var(--shadow);border-color:#b8c8ba}
+.mini .dotst.running{box-shadow:0 0 0 3px var(--run-soft)}
+.mini .dotst.paused{box-shadow:0 0 0 3px var(--pause-soft);animation:none}
+.mb-start{background:var(--accent)}
+.card{border-radius:10px;box-shadow:none}
+.demo-log{background:#2e3530;background-image:none}
+.ico,.mark,.em{font-size:0;display:inline-grid;place-items:center;width:18px;height:18px}
+.ico::before{content:'◷';font-size:17px;color:var(--accent)}
+.mark::before{content:'•';font-size:18px;color:var(--run)}
+.rec .abort .mark::before{color:var(--pause)}
+.em::before{content:'!';font-size:12px;font-weight:600;color:var(--pause)}
+.win-btn.pin,.win-btn.close{font-size:0}
+.win-btn.pin::before{content:'●';font-size:11px;color:var(--text-3)}
+.win-btn.pin.on::before{color:var(--accent)}
+.win-btn.close::before{content:'×';font-size:16px}
+.btn.primary::first-letter,.btn.ghost.danger::first-letter{font-size:0}
+</style>
+</head>
+<body>
+
+<header class="page-head">
+  <h1><span class="logo" aria-hidden="true">◷</span>koji · 原型图</h1>
+  <div class="meta">
+    <span class="chip accent">版本 <b>v0.2</b></span>
+    <span class="chip">平台 <b>Windows 桌面端</b></span>
+    <span class="chip">技术栈 <b>Tauri 2.x</b></span>
+    <span class="chip">正常视图 <b>420 × 560 px</b></span>
+    <span class="chip">小视图 <b>220 × 90 px</b></span>
+    <span class="chip">日期 <b>2026-11-24</b></span>
+  </div>
+</header>
+
+<nav class="toc">
+  <div class="toc-inner">
+    <a href="#overview"><span>01</span>设计概览</a>
+    <a href="#normal"><span>02</span>正常视图</a>
+    <a href="#dialog"><span>03</span>记录填写弹窗</a>
+    <a href="#mini"><span>04</span>小视图</a>
+    <a href="#settings"><span>05</span>设置面板</a>
+    <a href="#fsm"><span>06</span>计时状态机</a>
+    <a href="#rules"><span>07</span>关键规则</a>
+    <a href="#demo"><span>08</span>交互演示</a>
+  </div>
+</nav>
+
+<main>
+
+<!-- ============ 01 概览 ============ -->
+<section id="overview">
+  <div class="sec-head">
+    <h2>设计概览</h2>
+    <p>两种窗口形态共享同一份计时状态与数据；切换视图时正在进行的倒计时不中断、不重置。以下原型均按文档中的建议尺寸绘制。</p>
+  </div>
+  <div class="grid-cards">
+    <div class="card">
+      <h3><span class="n">A</span>正常视图 Normal View</h3>
+      <ul>
+        <li>倒计时主区（环形进度 + <b>MM:SS</b> 大字）</li>
+        <li>快捷时长 <b>15 / 25 / 45 / 60</b> + 自定义</li>
+        <li>开始 / 暂停 / 继续 / 中止 操作区</li>
+        <li>记录列表（今日 / 昨天 / 更早 分组）</li>
+        <li>标题栏：置顶 · 切小窗 切换 · 最小化 · 关闭</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3><span class="n">B</span>小视图 Mini View</h3>
+      <ul>
+        <li>无边框，<b>220 × 90 px</b>，默认置顶</li>
+        <li>状态色点 + 大字倒计时 + 细进度条</li>
+        <li>按钮最少化：开始 / 暂停 / 继续 / 中止</li>
+        <li>按住<b>任意空白区域</b>拖动</li>
+        <li>双击空白区切换回正常视图</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3><span class="n">C</span>状态与配色</h3>
+      <ul>
+        <li><b style="color:var(--idle)">● 空闲 Idle</b> — 灰色</li>
+        <li><b style="color:#12884a">● 运行中 Running</b> — 绿色</li>
+        <li><b style="color:#b06f08">● 已暂停 Paused</b> — 黄色 / 闪烁</li>
+        <li>置顶生效时窗口描边高亮（蓝色描边）</li>
+        <li>完成 绿 / 中止 橙 区分结束方式</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3><span class="n">D</span>记录生成流程</h3>
+      <ul>
+        <li>中止且已计时 <b>≥ 5 分钟</b> → 弹填写框</li>
+        <li>倒计时自然完成 → 弹填写框（无 5 分钟限制）</li>
+        <li>弹窗点<b>保存</b>才生成记录；点<b>放弃</b>不生成任何记录</li>
+        <li>不足 5 分钟中止 → 不弹框、不生成，仅轻提示</li>
+        <li>保存 / 放弃后均回到空闲状态</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 02 正常视图 ============ -->
+<section id="normal">
+  <div class="sec-head">
+    <h2>正常视图 · 三种状态</h2>
+    <p>窗口建议尺寸 <code>420 × 560 px</code>。空闲态可设定时长；开始后时长控件锁定（置灰不可编辑），按钮切换为「暂停 / 中止」。</p>
+  </div>
+  <div class="stage">
+
+    <!-- 空闲态 -->
+    <div class="frame-cell">
+      <div class="frame-label"><span class="dot" style="background:var(--idle)"></span>状态 1 · 空闲 Idle</div>
+      <div class="win">
+        <div class="titlebar">
+          <div class="app-name"><span class="ico">◷</span>koji</div>
+          <button class="win-btn pin" title="置顶">置顶</button>
+          <button class="win-btn" title="切换到小视图">切换</button>
+          <button class="win-btn" title="最小化到托盘">—</button>
+          <button class="win-btn close" title="关闭">×</button>
+        </div>
+        <div class="timer-zone">
+          <div class="ring-wrap">
+            <svg class="ring idle" viewBox="0 0 206 206">
+              <circle class="track" cx="103" cy="103" r="88"></circle>
+              <circle class="bar" cx="103" cy="103" r="88"
+                stroke-dasharray="552.9" stroke-dashoffset="0"></circle>
+            </svg>
+            <div class="time-read">25:00</div>
+          </div>
+          <div class="state-tag idle">待 开 始</div>
+          <div class="sub-line">默认时长 25 分钟 · 可调整为 1 ~ 240 分钟</div>
+        </div>
+        <div class="duration-row">
+          <span class="lab">时长</span>
+          <button class="chip-btn">15</button>
+          <button class="chip-btn sel">25</button>
+          <button class="chip-btn">45</button>
+          <button class="chip-btn">60</button>
+          <button class="chip-btn">自定义 ▾</button>
+        </div>
+        <div class="action-row">
+          <button class="btn primary lg"> 开始</button>
+        </div>
+        <div class="records">
+          <div class="records-head">
+            <div class="t">今日记录 <span class="cnt">3</span></div>
+            <div class="ops"><button class="win-btn" title="设置">设置</button></div>
+          </div>
+          <div class="day-group">今天</div>
+          <div class="rec">
+            <div class="mark">完成</div>
+            <div class="body">
+              <div class="r1"><span class="rtime">2026-11-24 09:20</span><span class="rdur done">25 分钟</span><span class="tail">删除</span></div>
+              <div class="rtext">整理需求文档，确认 Tauri 技术栈</div>
+            </div>
+          </div>
+          <div class="day-group">昨天</div>
+          <div class="rec">
+            <div class="mark">完成</div>
+            <div class="body">
+              <div class="r1"><span class="rtime">2026-11-23 10:30</span><span class="rdur done">25 分钟</span><span class="tail">删除</span></div>
+              <div class="rtext">完成了数学第三章习题</div>
+            </div>
+          </div>
+          <div class="rec">
+            <div class="mark">中止</div>
+            <div class="body">
+              <div class="r1"><span class="rtime">2026-11-23 09:12</span><span class="rdur abort">13 分钟</span><span class="tail">删除</span></div>
+              <div class="rtext">背单词（中途被打断）</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="note">时长控件可用；主按钮为单个「开始」。<br>记录列表按时间倒序，完成 / 中止用 <b>完成 / 中止</b> 与颜色区分。</div>
+    </div>
+
+    <!-- 运行态 -->
+    <div class="frame-cell">
+      <div class="frame-label"><span class="dot" style="background:var(--run)"></span>状态 2 · 运行中 Running</div>
+      <div class="win">
+        <div class="titlebar">
+          <div class="app-name"><span class="ico">◷</span>koji</div>
+          <button class="win-btn pin on" title="置顶已开启">置顶</button>
+          <button class="win-btn" title="切换到小视图">切换</button>
+          <button class="win-btn" title="最小化到托盘">—</button>
+          <button class="win-btn close" title="关闭">×</button>
+        </div>
+        <div class="timer-zone">
+          <div class="ring-wrap">
+            <svg class="ring running" viewBox="0 0 206 206">
+              <circle class="track" cx="103" cy="103" r="88"></circle>
+              <circle class="bar" cx="103" cy="103" r="88"
+                stroke-dasharray="552.9" stroke-dashoffset="221.2"></circle>
+            </svg>
+            <div class="time-read">15:01</div>
+          </div>
+          <div class="state-tag running">专注中</div>
+          <div class="sub-line">计划 25 分钟 · 已专注 9 分 59 秒</div>
+        </div>
+        <div class="duration-row">
+          <span class="lab">时长</span>
+          <button class="chip-btn" disabled>15</button>
+          <button class="chip-btn sel" disabled>25</button>
+          <button class="chip-btn" disabled>45</button>
+          <button class="chip-btn" disabled>60</button>
+          <button class="chip-btn" disabled>自定义 ▾</button>
+        </div>
+        <div class="action-row">
+          <button class="btn ghost"> 暂停</button>
+          <button class="btn ghost danger">中止</button>
+        </div>
+        <div class="records">
+          <div class="records-head">
+            <div class="t">今日记录 <span class="cnt">1</span></div>
+            <div class="ops"><button class="win-btn" title="设置">设置</button></div>
+          </div>
+          <div class="day-group">今天</div>
+          <div class="rec">
+            <div class="mark">完成</div>
+            <div class="body">
+              <div class="r1"><span class="rtime">2026-11-24 09:20</span><span class="rdur done">25 分钟</span></div>
+              <div class="rtext">整理需求文档，确认 Tauri 技术栈</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="note">时长按钮整体置灰锁定；环形进度按剩余比例收缩；<br>置顶按钮呈高亮态（置顶 橙色底）。</div>
+    </div>
+
+    <!-- 暂停态 -->
+    <div class="frame-cell">
+      <div class="frame-label"><span class="dot" style="background:var(--pause)"></span>状态 3 · 已暂停 Paused</div>
+      <div class="win">
+        <div class="titlebar">
+          <div class="app-name"><span class="ico">◷</span>koji</div>
+          <button class="win-btn pin" title="置顶">置顶</button>
+          <button class="win-btn" title="切换到小视图">切换</button>
+          <button class="win-btn" title="最小化到托盘">—</button>
+          <button class="win-btn close" title="关闭">×</button>
+        </div>
+        <div class="timer-zone">
+          <div class="ring-wrap">
+            <svg class="ring paused" viewBox="0 0 206 206">
+              <circle class="track" cx="103" cy="103" r="88"></circle>
+              <circle class="bar" cx="103" cy="103" r="88"
+                stroke-dasharray="552.9" stroke-dashoffset="221.2"></circle>
+            </svg>
+            <div class="time-read">15:01</div>
+          </div>
+          <div class="state-tag paused">已 暂 停</div>
+          <div class="sub-line">已专注 9 分 59 秒 · 暂停时长不计入记录</div>
+        </div>
+        <div class="duration-row">
+          <span class="lab">时长</span>
+          <button class="chip-btn" disabled>15</button>
+          <button class="chip-btn sel" disabled>25</button>
+          <button class="chip-btn" disabled>45</button>
+          <button class="chip-btn" disabled>60</button>
+          <button class="chip-btn" disabled>自定义 ▾</button>
+        </div>
+        <div class="action-row">
+          <button class="btn primary"> 继续</button>
+          <button class="btn ghost danger">中止</button>
+        </div>
+        <div class="records">
+          <div class="records-head">
+            <div class="t">今日记录 <span class="cnt">1</span></div>
+            <div class="ops"><button class="win-btn" title="设置">设置</button></div>
+          </div>
+          <div class="day-group">今天</div>
+          <div class="rec">
+            <div class="mark">完成</div>
+            <div class="body">
+              <div class="r1"><span class="rtime">2026-11-24 09:20</span><span class="rdur done">25 分钟</span></div>
+              <div class="rtext">整理需求文档，确认 Tauri 技术栈</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="note">暂停态环形进度转黄；按钮变为「继续 / 中止」，<br>持续时长 = 实际计时时间（<b>不含</b>暂停）。</div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ============ 03 记录弹窗 ============ -->
+<section id="dialog">
+  <div class="sec-head">
+    <h2>记录填写弹窗 · 中止 / 完成 / 保护提示</h2>
+    <p>中止（已计时 ≥ 5 分钟）与倒计时完成都会弹出同一形态的填写框；点「保存记录」才生成记录，点「放弃」<b>完全不生成任何记录</b>。</p>
+  </div>
+  <div class="stage">
+
+    <!-- 中止弹窗 -->
+    <div class="frame-cell">
+      <div class="frame-label"><span class="dot" style="background:#c2760a"></span>中止填写弹窗 <small>finishType = aborted</small></div>
+      <div class="win">
+        <div class="titlebar">
+          <div class="app-name"><span class="ico">◷</span>koji</div>
+          <button class="win-btn pin">置顶</button>
+          <button class="win-btn">切换</button>
+          <button class="win-btn">—</button>
+          <button class="win-btn close">×</button>
+        </div>
+        <div class="timer-zone" style="filter:blur(1.5px);opacity:.5">
+          <div class="ring-wrap">
+            <svg class="ring idle" viewBox="0 0 206 206">
+              <circle class="track" cx="103" cy="103" r="88"></circle>
+              <circle class="bar" cx="103" cy="103" r="88" stroke-dasharray="552.9" stroke-dashoffset="265"></circle>
+            </svg>
+            <div class="time-read">25:00</div>
+          </div>
+        </div>
+        <div class="overlay">
+          <div class="dialog">
+            <div class="dhead">中止 本次专注已结束</div>
+            <div class="dbody">
+              <div class="dmeta">
+                <div class="row"><span>开始时间</span><b>2026-11-23 10:05</b></div>
+                <div class="row"><span>持续时长</span><b>13 分钟（计划 25 分钟）</b></div>
+              </div>
+              <label class="fl">这段时间做了什么？（选填）</label>
+              <textarea placeholder="例如：背单词（中途被打断）">背单词（中途被打断）</textarea>
+              <div class="counter">12 / 500</div>
+            </div>
+            <div class="cfoot">
+              <button class="btn ghost">放弃</button>
+              <button class="btn primary">保存记录</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="note">弹窗展示<b>生成时间与持续时长（只读）</b>，内容非必填。<br>「放弃」→ 不生成任何记录并回到空闲态。</div>
+    </div>
+
+    <!-- 完成弹窗 -->
+    <div class="frame-cell">
+      <div class="frame-label"><span class="dot" style="background:#12884a"></span>完成填写弹窗 <small>finishType = completed</small></div>
+      <div class="win">
+        <div class="titlebar">
+          <div class="app-name"><span class="ico">◷</span>koji</div>
+          <button class="win-btn pin">置顶</button>
+          <button class="win-btn">切换</button>
+          <button class="win-btn">—</button>
+          <button class="win-btn close">×</button>
+        </div>
+        <div class="timer-zone" style="filter:blur(1.5px);opacity:.5">
+          <div class="ring-wrap">
+            <svg class="ring idle" viewBox="0 0 206 206">
+              <circle class="track" cx="103" cy="103" r="88"></circle>
+              <circle class="bar" cx="103" cy="103" r="88" stroke-dasharray="552.9" stroke-dashoffset="552.9"></circle>
+            </svg>
+            <div class="time-read">00:00</div>
+          </div>
+        </div>
+        <div class="overlay">
+          <div class="dialog">
+            <div class="dhead"> 专注完成！</div>
+            <div class="dbody">
+              <div class="dmeta">
+                <div class="row"><span>开始时间</span><b>2026-11-24 09:20</b></div>
+                <div class="row"><span>持续时长</span><b>25 分钟（计划 25 分钟）</b></div>
+              </div>
+              <label class="fl">这段时间做了什么？（选填）</label>
+              <textarea>完成了一个番茄钟</textarea>
+              <div class="counter">9 / 500</div>
+            </div>
+            <div class="cfoot">
+              <button class="btn ghost">放弃</button>
+              <button class="btn primary">保存记录</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="note">倒计时归零：播放提示音 + 系统通知（建议项）。<br>内容可预填「完成了一个番茄钟」，<b>不受 5 分钟规则限制</b>。</div>
+    </div>
+
+    <!-- 5 分钟保护 -->
+    <div class="frame-cell">
+      <div class="frame-label"><span class="dot" style="background:var(--danger)"></span>不足 5 分钟 · 保护提示 <small>不弹框、不生成</small></div>
+      <div class="win">
+        <div class="titlebar">
+          <div class="app-name"><span class="ico">◷</span>koji</div>
+          <button class="win-btn pin">置顶</button>
+          <button class="win-btn">切换</button>
+          <button class="win-btn">—</button>
+          <button class="win-btn close">×</button>
+        </div>
+        <div class="timer-zone">
+          <div class="ring-wrap">
+            <svg class="ring idle" viewBox="0 0 206 206">
+              <circle class="track" cx="103" cy="103" r="88"></circle>
+              <circle class="bar" cx="103" cy="103" r="88" stroke-dasharray="552.9" stroke-dashoffset="0"></circle>
+            </svg>
+            <div class="time-read">25:00</div>
+          </div>
+          <div class="state-tag idle">待 开 始</div>
+          <div class="sub-line">已回到空闲状态</div>
+        </div>
+        <div class="duration-row">
+          <span class="lab">时长</span>
+          <button class="chip-btn">15</button>
+          <button class="chip-btn sel">25</button>
+          <button class="chip-btn">45</button>
+          <button class="chip-btn">60</button>
+          <button class="chip-btn">自定义 ▾</button>
+        </div>
+        <div class="action-row">
+          <button class="btn primary lg"> 开始</button>
+        </div>
+        <div class="toast"><span class="ic">提示</span>本次专注不足 5 分钟，未生成记录</div>
+        <div class="records">
+          <div class="records-head">
+            <div class="t">今日记录 <span class="cnt">1</span></div>
+            <div class="ops"><button class="win-btn" title="设置">设置</button></div>
+          </div>
+          <div class="day-group">今天</div>
+          <div class="rec">
+            <div class="mark">完成</div>
+            <div class="body">
+              <div class="r1"><span class="rtime">2026-11-24 09:20</span><span class="rdur done">25 分钟</span></div>
+              <div class="rtext">整理需求文档，确认 Tauri 技术栈</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="note">阈值固定 <b>300 秒</b>，不开放配置。<br>轻提示后直接回到空闲状态，列表无新增。</div>
+    </div>
+
+    <!-- 中止二次确认 -->
+    <div class="frame-cell">
+      <div class="frame-label"><span class="dot" style="background:var(--accent)"></span>中止二次确认（建议项）</div>
+      <div class="win">
+        <div class="titlebar">
+          <div class="app-name"><span class="ico">◷</span>koji</div>
+          <button class="win-btn pin on">置顶</button>
+          <button class="win-btn">切换</button>
+          <button class="win-btn">—</button>
+          <button class="win-btn close">×</button>
+        </div>
+        <div class="timer-zone">
+          <div class="ring-wrap">
+            <svg class="ring running" viewBox="0 0 206 206">
+              <circle class="track" cx="103" cy="103" r="88"></circle>
+              <circle class="bar" cx="103" cy="103" r="88" stroke-dasharray="552.9" stroke-dashoffset="221.2"></circle>
+            </svg>
+            <div class="time-read">15:01</div>
+          </div>
+          <div class="state-tag running">专注中</div>
+          <div class="sub-line">计划 25 分钟 · 已专注 9 分 59 秒</div>
+        </div>
+        <div class="duration-row">
+          <span class="lab">时长</span>
+          <button class="chip-btn" disabled>15</button>
+          <button class="chip-btn sel" disabled>25</button>
+          <button class="chip-btn" disabled>45</button>
+          <button class="chip-btn" disabled>60</button>
+          <button class="chip-btn" disabled>自定义 ▾</button>
+        </div>
+        <div class="action-row">
+          <button class="btn ghost"> 暂停</button>
+          <button class="btn ghost danger">中止</button>
+          <div class="confirm-pop" style="bottom:74px;right:24px">
+            <div class="q"><span class="em">提示</span><span>确定要中止本次专注吗？</span></div>
+            <div class="cp-foot">
+              <button class="btn ghost">取消</button>
+              <button class="btn primary">确定</button>
+            </div>
+          </div>
+        </div>
+        <div class="records">
+          <div class="records-head">
+            <div class="t">今日记录 <span class="cnt">1</span></div>
+            <div class="ops"><button class="win-btn" title="设置">设置</button></div>
+          </div>
+          <div class="day-group">今天</div>
+          <div class="rec">
+            <div class="mark">完成</div>
+            <div class="body">
+              <div class="r1"><span class="rtime">2026-11-24 09:20</span><span class="rdur done">25 分钟</span></div>
+              <div class="rtext">整理需求文档，确认 Tauri 技术栈</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="note">由设置项 <code>abortConfirm</code> 控制，默认开启，防止误触。</div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ============ 04 小视图 ============ -->
+<section id="mini">
+  <div class="sec-head">
+    <h2>小视图 · 220 × 90 px（下图为 1.6× 放大展示）</h2>
+    <p>无边框窗口，按住<b>任意空白区域</b>即可拖动。状态由左侧色点与进度条颜色表达；按钮随状态切换。置顶状态与正常视图相互独立、各自持久化，小视图默认<b>开启置顶</b>。</p>
+  </div>
+  <div class="stage">
+
+    <div class="frame-cell">
+      <div class="frame-label"><span class="dot" style="background:var(--idle)"></span>空闲态 <small>默认置顶开启</small></div>
+      <div class="zoom16">
+        <div class="mini ontop">
+          <div class="mini-body">
+            <div class="mini-top">
+              <span class="dotst"></span>
+              <span class="mini-time idle">25:00</span>
+              <button class="mini-pin on" title="置顶已开启">置顶</button>
+            </div>
+            <div class="mini-bar"><i class="idle" style="width:100%"></i></div>
+            <div class="mini-btns"><button class="mb-start"> 开始</button></div>
+          </div>
+        </div>
+      </div>
+      <div class="note">蓝色描边表示置顶生效；仅一个「开始」按钮。</div>
+    </div>
+
+    <div class="frame-cell">
+      <div class="frame-label"><span class="dot" style="background:var(--run)"></span>运行态 <small>绿色状态点</small></div>
+      <div class="zoom16">
+        <div class="mini ontop">
+          <div class="mini-body">
+            <div class="mini-top">
+              <span class="dotst running"></span>
+              <span class="mini-time">15:01</span>
+              <button class="mini-pin on" title="置顶已开启">置顶</button>
+            </div>
+            <div class="mini-bar"><i style="width:60%"></i></div>
+            <div class="mini-btns">
+              <button class="mb-run"> 暂停</button>
+              <button class="mb-stop">中止</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="note">细进度条显示剩余比例，随倒计时收缩。</div>
+    </div>
+
+    <div class="frame-cell">
+      <div class="frame-label"><span class="dot" style="background:var(--pause)"></span>暂停态 <small>黄色点闪烁</small></div>
+      <div class="zoom16">
+        <div class="mini ontop">
+          <div class="mini-body">
+            <div class="mini-top">
+              <span class="dotst paused"></span>
+              <span class="mini-time">15:01</span>
+              <button class="mini-pin on" title="置顶已开启">置顶</button>
+            </div>
+            <div class="mini-bar"><i class="paused" style="width:60%"></i></div>
+            <div class="mini-btns">
+              <button class="mb-start"> 继续</button>
+              <button class="mb-stop">中止</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="note">暂停状态下「中止」依旧可用。</div>
+    </div>
+
+    <div class="frame-cell">
+      <div class="frame-label"><span class="dot" style="background:#c2760a"></span>中止填写小弹窗 <small>紧凑形态</small></div>
+      <div class="zoom16">
+        <div class="mini ontop">
+          <div class="mini-body" style="filter:blur(1.5px);opacity:.45">
+            <div class="mini-top">
+              <span class="dotst"></span>
+              <span class="mini-time idle">25:00</span>
+              <button class="mini-pin on">置顶</button>
+            </div>
+            <div class="mini-bar"><i class="idle" style="width:100%"></i></div>
+            <div class="mini-btns"><button class="mb-start"> 开始</button></div>
+          </div>
+          <div class="overlay" style="border-radius:12px">
+            <div class="dialog compact">
+              <div class="dhead">中止 专注已结束</div>
+              <div class="dbody">
+                <div class="dmeta">
+                  <div class="row"><span>开始</span><b>10:05</b></div>
+                  <div class="row"><span>时长</span><b>13 分钟</b></div>
+                </div>
+                <textarea placeholder="这段时间做了什么？">背单词</textarea>
+              </div>
+              <div class="cfoot">
+                <button class="btn ghost">放弃</button>
+                <button class="btn primary">保存</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="note">弹窗遵循小视图当前的置顶设置；<br>规则与正常视图完全一致。</div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ============ 05 设置 ============ -->
+<section id="settings">
+  <div class="sec-head">
+    <h2>设置面板</h2>
+    <p>设置项持久化保存；修改默认时长对<b>下一次新会话</b>生效，不影响正在进行的会话。5 分钟保护阈值为固定值 300 秒，不开放配置。</p>
+  </div>
+  <div class="stage">
+    <div class="frame-cell">
+      <div class="frame-label"><span class="dot" style="background:var(--accent)"></span>设置面板 · 模态</div>
+      <div class="win">
+        <div class="titlebar">
+          <div class="app-name"><span class="ico">◷</span>koji</div>
+          <button class="win-btn pin">置顶</button>
+          <button class="win-btn">切换</button>
+          <button class="win-btn">—</button>
+          <button class="win-btn close">×</button>
+        </div>
+        <div class="timer-zone" style="padding:18px;filter:blur(1.5px);opacity:.45">
+          <div class="ring-wrap" style="width:150px;height:150px">
+            <svg class="ring idle" viewBox="0 0 206 206">
+              <circle class="track" cx="103" cy="103" r="88"></circle>
+              <circle class="bar" cx="103" cy="103" r="88" stroke-dasharray="552.9" stroke-dashoffset="0"></circle>
+            </svg>
+            <div class="time-read" style="font-size:38px">25:00</div>
+          </div>
+        </div>
+        <div class="overlay">
+          <div class="dialog" style="max-width:340px">
+            <div class="dhead">设置</div>
+            <div class="dbody" style="padding-bottom:0">
+              <div class="dmeta" style="gap:0;background:#fff;border:none;padding:0">
+                <div class="row" style="align-items:center;padding:11px 0;border-bottom:1px solid var(--line-soft)">
+                  <span style="font-size:13px;color:var(--text)">默认倒计时时长</span>
+                  <b style="display:flex;align-items:center;gap:5px">
+                    <input class="txt" value="25" style="width:62px;text-align:center;padding:5px 8px">
+                    <span style="font-size:12px;color:var(--text-3);font-weight:400">分钟</span>
+                  </b>
+                </div>
+                <div class="row" style="align-items:center;padding:11px 0;border-bottom:1px solid var(--line-soft)">
+                  <span style="font-size:13px;color:var(--text)">提示音</span>
+                  <b><input type="checkbox" checked style="accent-color:var(--accent);width:16px;height:16px"></b>
+                </div>
+                <div class="row" style="align-items:center;padding:11px 0;border-bottom:1px solid var(--line-soft)">
+                  <span style="font-size:13px;color:var(--text)">中止二次确认</span>
+                  <b><input type="checkbox" checked style="accent-color:var(--accent);width:16px;height:16px"></b>
+                </div>
+                <div class="row" style="align-items:center;padding:11px 0">
+                  <span style="font-size:13px;color:var(--text)">小视图默认置顶</span>
+                  <b><input type="checkbox" checked style="accent-color:var(--accent);width:16px;height:16px"></b>
+                </div>
+              </div>
+              <div style="font-size:11.5px;color:var(--text-3);margin-top:14px;background:var(--surface-2);padding:9px 11px;border-radius:8px">
+                有效范围 1 ~ 240 分钟。「不足 5 分钟不生成记录」为固定规则（300 秒），不在此处配置。
+              </div>
+            </div>
+            <div class="cfoot">
+              <button class="btn ghost">取消</button>
+              <button class="btn primary">保存</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="note">入口位于记录区右上角 设置。</div>
+    </div>
+
+    <div class="frame-cell">
+      <div class="frame-label"><span class="dot" style="background:var(--danger)"></span>计时中退出确认 <small>NFR-3 / Q5</small></div>
+      <div class="win" style="height:auto">
+        <div class="titlebar">
+          <div class="app-name"><span class="ico">◷</span>koji</div>
+          <button class="win-btn pin on">置顶</button>
+          <button class="win-btn">切换</button>
+          <button class="win-btn">—</button>
+          <button class="win-btn close">×</button>
+        </div>
+        <div class="timer-zone" style="filter:blur(1.5px);opacity:.45;padding:20px">
+          <div class="ring-wrap" style="width:160px;height:160px">
+            <svg class="ring running" viewBox="0 0 206 206">
+              <circle class="track" cx="103" cy="103" r="88"></circle>
+              <circle class="bar" cx="103" cy="103" r="88" stroke-dasharray="552.9" stroke-dashoffset="331.7"></circle>
+            </svg>
+            <div class="time-read" style="font-size:40px">10:00</div>
+          </div>
+        </div>
+        <div class="overlay">
+          <div class="dialog" style="max-width:330px">
+            <div class="dhead">提示 正在专注中</div>
+            <div class="dbody">
+              <div style="font-size:12.5px;color:var(--text-2);line-height:1.65;margin:6px 0 4px">
+                当前会话已专注 <b style="color:var(--text)">15 分 00 秒</b>。退出前是否保存本次记录？
+              </div>
+              <div class="dmeta" style="margin-top:12px">
+                <div class="row"><span>退出后</span><b>计时将停止</b></div>
+              </div>
+            </div>
+            <div class="cfoot" style="flex-direction:column;gap:8px">
+              <button class="btn primary" style="width:100%">保存记录并退出</button>
+              <button class="btn ghost danger" style="width:100%">丢弃记录并退出</button>
+              <button class="btn ghost" style="width:100%">取消</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="note">仅「真正退出」时触发；最小化到托盘不中断计时。</div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ============ 06 状态机 ============ -->
+<section id="fsm">
+  <div class="sec-head">
+    <h2>计时状态机</h2>
+    <p>两种视图共用同一状态机；视图切换只更换渲染窗口，不改变任何状态。<b>持续时长 = 归零或中止时刻 − startedAt − 累计暂停时长</b>。</p>
+  </div>
+  <div class="fsm">
+    <svg viewBox="0 0 900 400" width="100%" height="400" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <path d="M0,0 L10,5 L0,10 z" fill="#94a0b8"/>
+        </marker>
+        <marker id="arA" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <path d="M0,0 L10,5 L0,10 z" fill="#5b6ef5"/>
+        </marker>
+      </defs>
+
+      <!-- 状态框 -->
+      <g font-family="Segoe UI,Microsoft YaHei,sans-serif">
+        <rect x="60" y="150" width="150" height="76" rx="14" fill="#f0f1f5" stroke="#d8dde8" stroke-width="1.5"/>
+        <text x="135" y="184" text-anchor="middle" font-size="16" font-weight="600" fill="#4a5468">空闲</text>
+        <text x="135" y="205" text-anchor="middle" font-size="12" fill="#9ba2b2">Idle</text>
+
+        <rect x="330" y="150" width="150" height="76" rx="14" fill="#e9f9ef" stroke="#9fe0b8" stroke-width="1.5"/>
+        <text x="405" y="184" text-anchor="middle" font-size="16" font-weight="600" fill="#12884a">运行中</text>
+        <text x="405" y="205" text-anchor="middle" font-size="12" fill="#5aa87b">Running</text>
+
+        <rect x="600" y="150" width="150" height="76" rx="14" fill="#fdf3e2" stroke="#f2d29b" stroke-width="1.5"/>
+        <text x="675" y="184" text-anchor="middle" font-size="16" font-weight="600" fill="#b06f08">已暂停</text>
+        <text x="675" y="205" text-anchor="middle" font-size="12" fill="#c08c3d">Paused</text>
+
+        <rect x="600" y="40" width="150" height="66" rx="13" fill="#eef0fe" stroke="#c3caf5" stroke-width="1.5" stroke-dasharray="5 4"/>
+        <text x="675" y="70" text-anchor="middle" font-size="14" font-weight="600" fill="#4451c4">记录填写框</text>
+        <text x="675" y="90" text-anchor="middle" font-size="11.5" fill="#8b95c9">保存 / 放弃</text>
+
+        <rect x="330" y="300" width="150" height="66" rx="13" fill="#eef0fe" stroke="#c3caf5" stroke-width="1.5" stroke-dasharray="5 4"/>
+        <text x="405" y="330" text-anchor="middle" font-size="14" font-weight="600" fill="#4451c4">完成弹窗</text>
+        <text x="405" y="350" text-anchor="middle" font-size="11.5" fill="#8b95c9">不受 5 分钟限制</text>
+      </g>
+
+      <!-- 连线 -->
+      <g stroke="#94a0b8" stroke-width="1.6" fill="none" marker-end="url(#ar)">
+        <!-- 空闲→运行 -->
+        <line x1="210" y1="188" x2="322" y2="188"/>
+        <!-- 运行→暂停 -->
+        <line x1="480" y1="188" x2="592" y2="188"/>
+        <!-- 暂停→运行 -->
+        <path d="M600,208 L488,208"/>
+        <!-- 暂停→中止 -->
+        <path d="M675,226 L675,290 L630,320" stroke-dasharray="4 4"/>
+        <!-- 运行→完成 -->
+        <path d="M405,226 L405,292"/>
+        <!-- 完成弹窗→空闲 -->
+        <path d="M330,333 L135,333 L135,232"/>
+        <!-- 暂停→记录框 -->
+        <path d="M750,188 L790,188 L790,73 L758,73"/>
+        <!-- 记录框→空闲 -->
+        <path d="M600,73 L40,73 L40,188 L52,188"/>
+      </g>
+
+      <!-- 标签 -->
+      <g font-family="Segoe UI,Microsoft YaHei,sans-serif" font-size="12">
+        <text x="266" y="180" text-anchor="middle" fill="#5b6ef5" font-weight="600">开始</text>
+        <text x="536" y="180" text-anchor="middle" fill="#5b6ef5" font-weight="600">暂停</text>
+        <text x="544" y="224" text-anchor="middle" fill="#5b6ef5" font-weight="600">继续</text>
+        <text x="414" y="263" text-anchor="middle" fill="#5b6ef5" font-weight="600">归零</text>
+        <text x="700" y="262" fill="#5b6ef5" font-weight="600">中止</text>
+        <text x="360" y="325" text-anchor="end" fill="#6a7183">保存 / 放弃</text>
+        <text x="770" y="140" fill="#5b6ef5" font-weight="600" text-anchor="middle">中止(≥5min)</text>
+        <text x="230" y="65" fill="#6a7183">保存 / 放弃</text>
+      </g>
+
+      <!-- 不足5分钟注解 -->
+      <g font-family="Segoe UI,Microsoft YaHei,sans-serif">
+        <rect x="60" y="262" width="216" height="52" rx="10" fill="#fef2f2" stroke="#f2cfcf" stroke-width="1.2" stroke-dasharray="4 3"/>
+        <text x="168" y="283" text-anchor="middle" font-size="12" font-weight="600" fill="#c0392b">中止且已计时 &lt; 5 分钟</text>
+        <text x="168" y="301" text-anchor="middle" font-size="11.5" fill="#c86a6a">不弹框 · 不生成记录 · 轻提示</text>
+      </g>
+    </svg>
+    <div class="fsm-legend">
+      <span><i style="background:var(--run)"></i>计时推进</span>
+      <span><i style="background:var(--accent)"></i>用户操作 / 结束</span>
+      <span><i style="background:var(--danger)"></i>5 分钟保护规则</span>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 07 关键规则 ============ -->
+<section id="rules">
+  <div class="sec-head">
+    <h2>关键规则速查</h2>
+    <p>以下规则直接决定 UI 文案与按钮可用性，实现时需逐条核对。</p>
+  </div>
+
+  <div class="rules" style="margin-bottom:26px">
+    <div class="rule warn">
+      <div class="rt">5 分钟保护</div>
+      <div class="rd">会话开始不足 <code>300 秒</code> 即被中止的，<b>不生成记录、不弹出填写框</b>，仅轻提示「本次专注不足 5 分钟，未生成记录」并回到空闲状态。该阈值固定，不开放配置。此规则<b>只约束「中止」</b>场景。</div>
+    </div>
+    <div class="rule ok">
+      <div class="rt">完成不受限</div>
+      <div class="rd">倒计时自然归零时，<b>即使设定时长小于 5 分钟</b>并完整走完，也照常弹出填写框；点击「保存记录」生成 <code>finishType = completed</code> 的记录。</div>
+    </div>
+    <div class="rule">
+      <div class="rt">保存 / 放弃</div>
+      <div class="rd">弹窗中「保存记录」才真正生成一条记录（content 可为空）；「放弃」<b>完全不生成任何记录</b>。两种操作结束后计时器均回到初始空闲状态。</div>
+    </div>
+    <div class="rule">
+      <div class="rt">持续时长</div>
+      <div class="rd"><code>duration = 归零或中止时刻 − startedAt − 累计暂停时长</code>，即只统计真正计时的时间，暂停时长不计入。</div>
+    </div>
+    <div class="rule">
+      <div class="rt">置顶独立</div>
+      <div class="rd">正常视图与小视图的置顶状态<b>各自维护、各自持久化</b>，切换视图互不影响。正常视图默认<b>不置顶</b>，小视图默认<b>置顶</b>。</div>
+    </div>
+    <div class="rule">
+      <div class="rt">视图切换</div>
+      <div class="rd">切换视图时正在进行的倒计时、暂停状态、剩余时间<b>完整保留</b>，计时不中断、不重置；新窗口出现在原窗口附近。</div>
+    </div>
+    <div class="rule">
+      <div class="rt">边界判定</div>
+      <div class="rd">剩余时间归零瞬间用户点了中止：以先触发的事件为准，<b>归零优先判定为「完成」</b>。</div>
+    </div>
+    <div class="rule">
+      <div class="rt">睡眠休眠</div>
+      <div class="rd">系统睡眠 / 休眠时间<b>计入</b>倒计时流逝时间（按真实时间计算）；唤醒后若已超时则视为完成并弹出完成填写框。计时基于单调时钟，不受用户修改系统时间影响。</div>
+    </div>
+  </div>
+
+  <div class="sec-head" style="margin-top:38px"><h2 style="font-size:17px">记录字段与配置结构</h2></div>
+  <table class="tbl" style="margin-bottom:22px">
+    <thead>
+      <tr><th>字段</th><th>类型</th><th>说明</th><th>来源</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><b>id</b></td><td>string</td><td>唯一标识（UUID）</td><td>系统生成</td></tr>
+      <tr><td><b>createdAt</b></td><td>datetime</td><td>记录生成时间（会话结束时刻）</td><td>系统生成</td></tr>
+      <tr><td><b>startedAt</b></td><td>datetime</td><td>会话开始时刻</td><td>系统生成</td></tr>
+      <tr><td><b>duration</b></td><td>int（秒）</td><td>持续时长 = 实际计时时间（不含暂停）</td><td>系统生成</td></tr>
+      <tr><td><b>plannedDuration</b></td><td>int（秒）</td><td>计划时长（设定的倒计时长度）</td><td>系统生成</td></tr>
+      <tr><td><b>content</b></td><td>string</td><td>用户填写的内容备注（最大 500 字符）</td><td>用户输入 · 可为空</td></tr>
+      <tr><td><b>finishType</b></td><td>enum</td><td><code>completed</code> 完成 / <code>aborted</code> 中止</td><td>系统生成</td></tr>
+    </tbody>
+  </table>
+
+  <table class="tbl">
+    <thead>
+      <tr><th>配置项</th><th>默认值</th><th>说明</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><b>defaultDurationMinutes</b></td><td>25</td><td>默认倒计时时长，范围 1 ~ 240</td></tr>
+      <tr><td><b>normalAlwaysOnTop</b></td><td>false</td><td>正常视图置顶（独立持久化）</td></tr>
+      <tr><td><b>miniAlwaysOnTop</b></td><td>true</td><td>小视图置顶（独立持久化）</td></tr>
+      <tr><td><b>soundEnabled</b></td><td>true</td><td>提示音开关</td></tr>
+      <tr><td><b>abortConfirm</b></td><td>true</td><td>中止二次确认开关</td></tr>
+      <tr><td><b>normalWindowPos / miniWindowPos</b></td><td>—</td><td>窗口位置记忆，超出屏幕时回退到屏幕中心</td></tr>
+      <tr><td><b>lastView</b></td><td>"normal"</td><td>上次使用的视图形态</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ============ 08 交互演示 ============ -->
+<section id="demo">
+  <div class="sec-head">
+    <h2>交互演示</h2>
+    <p>下面是一个可真实操作的计时原型：设定时长 → 开始 → 暂停 / 继续 → 中止 / 完成 → 保存记录 → 切换视图。计时逻辑与状态机、5 分钟规则均按文档实现。</p>
+  </div>
+  <div class="desk">
+    <div class="desk-controls">
+      <label class="switch"><input type="checkbox" id="fastMode"> 演示加速（5 分钟阈值 → 10 秒，仅用于体验规则）</label>
+      <label class="switch"><input type="checkbox" id="abortConfirm" checked> 中止二次确认</label>
+    </div>
+
+    <div id="demoStage">
+      <!-- 正常视图（演示用） -->
+      <div class="win" id="demoNormal">
+        <div class="titlebar">
+          <div class="app-name"><span class="ico">◷</span>koji</div>
+          <button class="win-btn pin" id="dPinNormal" title="置顶">置顶</button>
+          <button class="win-btn" id="dToMini" title="切换到小视图">切换</button>
+          <button class="win-btn" title="最小化到托盘">—</button>
+          <button class="win-btn close" title="关闭">×</button>
+        </div>
+        <div class="timer-zone">
+          <div class="ring-wrap">
+            <svg class="ring idle" id="dRing" viewBox="0 0 206 206">
+              <circle class="track" cx="103" cy="103" r="88"></circle>
+              <circle class="bar" id="dBar" cx="103" cy="103" r="88" stroke-dasharray="552.9" stroke-dashoffset="0"></circle>
+            </svg>
+            <div class="time-read" id="dTime">25:00</div>
+          </div>
+          <div class="state-tag idle" id="dTag">待 开 始</div>
+          <div class="sub-line" id="dSub">默认时长 25 分钟 · 调整后对下一次生效</div>
+        </div>
+        <div class="duration-row" id="dDurRow">
+          <span class="lab">时长</span>
+          <button class="chip-btn" data-min="15">15</button>
+          <button class="chip-btn sel" data-min="25">25</button>
+          <button class="chip-btn" data-min="45">45</button>
+          <button class="chip-btn" data-min="60">60</button>
+          <button class="chip-btn" id="dCustom">自定义 ▾</button>
+        </div>
+        <div class="action-row" id="dActions">
+          <button class="btn primary lg" id="dStart"> 开始</button>
+        </div>
+        <div class="records" style="max-height:220px;overflow-y:auto">
+          <div class="records-head">
+            <div class="t">专注记录 <span class="cnt" id="dCount">0</span></div>
+            <div class="ops"><span style="font-size:11px;color:var(--text-3)">（演示数据）</span></div>
+          </div>
+          <div id="dRecords"></div>
+        </div>
+      </div>
+
+      <!-- 小视图（演示用） -->
+      <div class="zoom16" id="demoMiniWrap" style="display:none">
+        <div class="mini" id="demoMini">
+          <div class="mini-body">
+            <div class="mini-top">
+              <span class="dotst" id="dmDot"></span>
+              <span class="mini-time idle" id="dmTime">25:00</span>
+              <button class="mini-pin" id="dmPin" title="置顶">置顶</button>
+            </div>
+            <div class="mini-bar"><i class="idle" id="dmBar" style="width:100%"></i></div>
+            <div class="mini-btns" id="dmBtns">
+              <button class="mb-start" id="dmStart"> 开始</button>
+            </div>
+          </div>
+          <div class="overlay hide" id="dmOverlay">
+            <div class="dialog compact">
+              <div class="dhead" id="dmDlgHead">中止 专注已结束</div>
+              <div class="dbody">
+                <div class="dmeta">
+                  <div class="row"><span>开始</span><b id="dmDlgStart">--:--</b></div>
+                  <div class="row"><span>时长</span><b id="dmDlgDur">-- 分钟</b></div>
+                </div>
+                <textarea id="dmDlgText" placeholder="这段时间做了什么？（选填）"></textarea>
+              </div>
+              <div class="cfoot">
+                <button class="btn ghost" id="dmDlgDiscard">放弃</button>
+                <button class="btn primary" id="dmDlgSave">保存</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="desk-hint">
+      <span><span class="kbd">切换</span> 切换到小视图</span>
+      <span><span class="kbd">置顶</span> 置顶开关（两视图独立）</span>
+      <span><span class="kbd">中止</span> 体验 5 分钟保护规则</span>
+    </div>
+    <div class="desk-help" id="dLog">提示：勾选「演示加速」后，计时满 10 秒即视为满足 5 分钟记录保护条件，方便快速验证中止流程。</div>
+  </div>
+
+  <!-- 正常视图弹窗 -->
+  <div class="overlay hide" id="dOverlay" style="position:fixed;z-index:60">
+    <div class="dialog">
+      <div class="dhead" id="dDlgHead">中止 本次专注已结束</div>
+      <div class="dbody">
+        <div class="dmeta">
+          <div class="row"><span>开始时间</span><b id="dDlgStart">--</b></div>
+          <div class="row"><span>持续时长</span><b id="dDlgDur">--</b></div>
+        </div>
+        <label class="fl">这段时间做了什么？（选填）</label>
+        <textarea id="dDlgText" placeholder="例如：背单词（中途被打断）"></textarea>
+        <div class="counter"><span id="dDlgLen">0</span> / 500</div>
+      </div>
+      <div class="cfoot">
+        <button class="btn ghost" id="dDlgDiscard">放弃</button>
+        <button class="btn primary" id="dDlgSave">保存记录</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer>koji · 原型图 v0.2 · 依据《需求详细文档》绘制 · 2026-11-24</footer>
+
+<script>
+(function(){
+  'use strict';
+  const $ = id => document.getElementById(id);
+  const CIRC = 552.9;
+  const THRESHOLD_NORMAL = 300;   // 5 分钟
+  const THRESHOLD_FAST   = 10;    // 演示加速
+
+  const S = { IDLE:'idle', RUNNING:'running', PAUSED:'paused' };
+
+  const state = {
+    status: S.IDLE,
+    planned: 25*60,
+    remain: 25*60,
+    startedAt: null,
+    deadline: 0,
+    tickId: null,
+    finished: null,      // {type, duration, startedAt}
+    view: 'normal',
+    fastMode: false,
+    abortConfirm: true,
+    pinNormal: false,
+    pinMini: true,
+    records: [
+      { type:'completed', createdAt:'2026-11-24 09:20', duration:1500, planned:1500, content:'整理需求文档，确认 Tauri 技术栈' },
+      { type:'completed', createdAt:'2026-11-23 10:30', duration:1500, planned:1500, content:'完成了数学第三章习题' },
+      { type:'aborted',   createdAt:'2026-11-23 09:12', duration:780,  planned:1500, content:'背单词（中途被打断）' }
+    ]
+  };
+
+  /* ---------- 工具 ---------- */
+  function fmt(sec){
+    sec = Math.max(0, Math.round(sec));
+    const h = Math.floor(sec/3600), m = Math.floor(sec%3600/60), s = sec%60;
+    const p = n => String(n).padStart(2,'0');
+    return h > 0 ? `${p(h)}:${p(m)}:${p(s)}` : `${p(m)}:${p(s)}`;
+  }
+  function friendly(sec){
+    const m = Math.round(sec/60);
+    if (m < 60) return m + ' 分钟';
+    const h = Math.floor(m/60), r = m%60;
+    return r === 0 ? h + ' 小时' : h + ' 小时 ' + r + ' 分钟';
+  }
+  function clock(date){
+    const p = n => String(n).padStart(2,'0');
+    return `${date.getFullYear()}-${p(date.getMonth()+1)}-${p(date.getDate())} ${p(date.getHours())}:${p(date.getMinutes())}`;
+  }
+  function hhmm(date){
+    const p = n => String(n).padStart(2,'0');
+    return `${p(date.getHours())}:${p(date.getMinutes())}`;
+  }
+  function elapsed(){ return state.planned - state.remain; }
+  function threshold(){ return state.fastMode ? THRESHOLD_FAST : THRESHOLD_NORMAL; }
+  function log(msg){ $('dLog').textContent = msg; }
+
+  /* ---------- 渲染 ---------- */
+  function render(){
+    const st = state.status, rem = state.remain, plan = state.planned;
+    const pct = plan > 0 ? rem/plan : 0;
+
+    // 正常视图
+    $('dTime').textContent = fmt(rem);
+    $('dBar').setAttribute('stroke-dashoffset', String(CIRC * (1 - pct)));
+    const ring = $('dRing');
+    ring.classList.remove('idle','running','paused');
+    ring.classList.add(st);
+
+    const tag = $('dTag');
+    tag.className = 'state-tag ' + st;
+    tag.textContent = st === S.IDLE ? '待 开 始' : st === S.RUNNING ? '专注中' : '已 暂 停';
+
+    if (st === S.IDLE) {
+      $('dSub').textContent = `默认时长 ${Math.round(plan/60)} 分钟 · 可调整为 1 ~ 240 分钟`;
+    } else {
+      $('dSub').textContent = `计划 ${friendly(plan)} · 已专注 ${friendly(elapsed())}`;
+    }
+
+    // 时长按钮锁定
+    document.querySelectorAll('#dDurRow .chip-btn').forEach(b => {
+      b.disabled = st !== S.IDLE;
+    });
+
+    // 操作按钮
+    const act = $('dActions');
+    act.innerHTML = '';
+    if (st === S.IDLE) {
+      act.appendChild(mkBtn('btn primary lg', ' 开始', start));
+    } else if (st === S.RUNNING) {
+      act.appendChild(mkBtn('btn ghost', ' 暂停', pause));
+      act.appendChild(mkBtn('btn ghost danger', '中止', tryAbort));
+    } else {
+      act.appendChild(mkBtn('btn primary', ' 继续', resume));
+      act.appendChild(mkBtn('btn ghost danger', '中止', tryAbort));
+    }
+
+    // 小视图
+    $('dmTime').textContent = fmt(rem);
+    $('dmTime').className = 'mini-time' + (st === S.IDLE ? ' idle' : '');
+    $('dmDot').className = 'dotst' + (st === S.RUNNING ? ' running' : st === S.PAUSED ? ' paused' : '');
+    const mb = $('dmBar');
+    mb.style.width = (pct*100).toFixed(1) + '%';
+    mb.className = st === S.RUNNING ? '' : st === S.PAUSED ? 'paused' : 'idle';
+
+    const mbtns = $('dmBtns');
+    mbtns.innerHTML = '';
+    if (st === S.IDLE) {
+      mbtns.appendChild(mkBtn('mb-start', ' 开始', start));
+    } else if (st === S.RUNNING) {
+      mbtns.appendChild(mkBtn('mb-run', ' 暂停', pause));
+      mbtns.appendChild(mkBtn('mb-stop', '中止', tryAbort));
+    } else {
+      mbtns.appendChild(mkBtn('mb-start', ' 继续', resume));
+      mbtns.appendChild(mkBtn('mb-stop', '中止', tryAbort));
+    }
+
+    // 置顶态
+    $('dPinNormal').className = 'win-btn pin' + (state.pinNormal ? ' on' : '');
+    $('dmPin').className = 'mini-pin' + (state.pinMini ? ' on' : '');
+    $('demoMini').className = 'mini' + (state.pinMini ? ' ontop' : '');
+
+    renderRecords();
+  }
+
+  function mkBtn(cls, label, fn){
+    const b = document.createElement('button');
+    b.className = cls;
+    b.textContent = label;
+    b.addEventListener('click', fn);
+    return b;
+  }
+
+  function renderRecords(){
+    const box = $('dRecords');
+    $('dCount').textContent = state.records.length;
+    if (!state.records.length) {
+      box.innerHTML = '<div style="font-size:12.5px;color:var(--text-3);padding:12px 2px">还没有记录，开始一次专注吧。</div>';
+      return;
+    }
+    box.innerHTML = '';
+    state.records.forEach((r, i) => {
+      const done = r.type === 'completed';
+      const el = document.createElement('div');
+      el.className = 'rec';
+      el.innerHTML =
+        '<div class="mark">' + (done ? '完成' : '中止') + '</div>' +
+        '<div class="body">' +
+          '<div class="r1">' +
+            '<span class="rtime">' + r.createdAt + '</span>' +
+            '<span class="rdur ' + (done ? 'done' : 'abort') + '">' + friendly(r.duration) + '</span>' +
+            '<span class="tail">删除</span>' +
+          '</div>' +
+          '<div class="rtext' + (r.content ? '' : ' empty') + '">' +
+            (r.content || '（未填写内容）') +
+          '</div>' +
+        '</div>';
+      el.querySelector('.tail').addEventListener('click', () => {
+        if (confirm('确定删除这条记录吗？\n\n' + r.createdAt + ' · ' + friendly(r.duration))) {
+          state.records.splice(i, 1);
+          render();
+          log('已删除一条记录。');
+        }
+      });
+      box.appendChild(el);
+    });
+  }
+
+  /* ---------- 计时控制 ---------- */
+  function start(){
+    if (state.status !== S.IDLE) return;
+    state.status = S.RUNNING;
+    state.startedAt = new Date();
+    state.deadline = Date.now() + state.remain * 1000;
+    state.finished = null;
+    runTicker();
+    render();
+    log('会话已开始，startedAt 已记录，时长设置已锁定。');
+  }
+
+  function pause(){
+    if (state.status !== S.RUNNING) return;
+    state.status = S.PAUSED;
+    state.remain = Math.max(0, Math.round((state.deadline - Date.now())/1000));
+    stopTicker();
+    render();
+    log('已暂停。暂停时长不计入记录的持续时长。');
+  }
+
+  function resume(){
+    if (state.status !== S.PAUSED) return;
+    state.status = S.RUNNING;
+    state.deadline = Date.now() + state.remain * 1000;
+    runTicker();
+    render();
+    log('已从暂停点继续倒计时。');
+  }
+
+  function runTicker(){
+    stopTicker();
+    state.tickId = setInterval(() => {
+      const left = Math.max(0, (state.deadline - Date.now()) / 1000);
+      state.remain = Math.ceil(left);
+      if (left <= 0) {
+        stopTicker();
+        complete();
+      } else {
+        render();
+      }
+    }, 200);
+  }
+
+  function stopTicker(){
+    if (state.tickId) { clearInterval(state.tickId); state.tickId = null; }
+  }
+
+  function complete(){
+    const dur = state.planned;   // 归零 => 完整走完
+    state.status = S.IDLE;
+    state.remain = state.planned;
+    state.finished = { type:'completed', duration: dur, startedAt: state.startedAt };
+    render();
+    openDialog('completed');
+    log('倒计时归零 → 判定为「完成」，弹出填写框（不受 5 分钟规则限制）。');
+  }
+
+  function tryAbort(){
+    if (state.status === S.IDLE) return;
+    if (state.status === S.RUNNING) pause();
+
+    if (state.remain <= 0) { complete(); return; }
+
+    const dur = elapsed();
+    if (dur < threshold()) {
+      reset();
+      toast('本次专注不足 5 分钟，未生成记录');
+      log('已计时 ' + friendly(dur) + ' < 阈值 ' + threshold() + ' 秒 → 不弹框、不生成记录，轻提示后回到空闲状态。');
+      return;
+    }
+    if (!state.abortConfirm) { doAbort(); return; }
+    showConfirmPop();
+  }
+
+  function doAbort(){
+    const dur = elapsed();
+    const started = state.startedAt;
+    state.finished = { type:'aborted', duration: dur, startedAt: started };
+    state.status = S.IDLE;
+    state.remain = state.planned;
+    state.startedAt = null;
+    render();
+    openDialog('aborted');
+    log('已计时 ' + friendly(dur) + ' ≥ 阈值 → 弹出中止填写框，「保存记录」才生成记录。');
+  }
+
+  function reset(){
+    stopTicker();
+    state.status = S.IDLE;
+    state.remain = state.planned;
+    state.startedAt = null;
+    state.finished = null;
+    render();
+  }
+
+  /* ---------- 二次确认气泡 ---------- */
+  function showConfirmPop(){
+    if (document.getElementById('demoConfirm')) return;
+    const pop = document.createElement('div');
+    pop.className = 'confirm-pop';
+    pop.id = 'demoConfirm';
+    pop.style.bottom = '78px';
+    pop.style.right = '24px';
+    pop.innerHTML =
+      '<div class="q"><span class="em">提示</span><span>确定要中止本次专注吗？</span></div>' +
+      '<div class="cp-foot">' +
+        '<button class="btn ghost" id="cpCancel">取消</button>' +
+        '<button class="btn primary" id="cpOk">确定</button>' +
+      '</div>';
+    $('dActions').appendChild(pop);
+    pop.querySelector('#cpCancel').addEventListener('click', () => {
+      pop.remove();
+      resume();
+      log('已取消中止，继续倒计时。');
+    });
+    pop.querySelector('#cpOk').addEventListener('click', () => {
+      pop.remove();
+      doAbort();
+    });
+  }
+
+  /* ---------- 提示 ---------- */
+  let toastTimer = null;
+  function toast(msg){
+    let t = document.getElementById('demoToast');
+    if (!t) {
+      t = document.createElement('div');
+      t.className = 'toast';
+      t.id = 'demoToast';
+      (state.view === 'normal' ? $('demoNormal') : $('demoMini')).appendChild(t);
+      t.style.left = '50%';
+    }
+    t.innerHTML = '<span class="ic">提示</span>' + msg;
+    t.classList.remove('hide');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => t.classList.add('hide'), 2600);
+  }
+
+  /* ---------- 填写弹窗 ---------- */
+  function openDialog(type){
+    const done = type === 'completed';
+    const f = state.finished || { duration:0, startedAt:new Date() };
+    const startLabel = f.startedAt ? clock(f.startedAt) : '—';
+
+    if (state.view === 'normal') {
+      $('dDlgHead').textContent = done ? ' 专注完成！' : '中止 本次专注已结束';
+      $('dDlgStart').textContent = startLabel;
+      $('dDlgDur').textContent = friendly(f.duration) + '（计划 ' + friendly(state.planned) + '）';
+      $('dDlgText').value = done ? '完成了一个番茄钟' : '';
+      $('dDlgLen').textContent = $('dDlgText').value.length;
+      $('dOverlay').classList.remove('hide');
+      $('dDlgText').focus();
+    } else {
+      $('dmDlgHead').textContent = done ? ' 专注完成！' : '中止 专注已结束';
+      $('dmDlgStart').textContent = f.startedAt ? hhmm(f.startedAt) : '—';
+      $('dmDlgDur').textContent = friendly(f.duration);
+      $('dmDlgText').value = done ? '完成了一个番茄钟' : '';
+      $('dmOverlay').classList.remove('hide');
+      $('dmDlgText').focus();
+    }
+  }
+
+  function closeDialogs(){
+    $('dOverlay').classList.add('hide');
+    $('dmOverlay').classList.add('hide');
+  }
+
+  function saveRecord(){
+    const text = (state.view === 'normal' ? $('dDlgText').value : $('dmDlgText').value).trim();
+    const f = state.finished || { type:'aborted', duration:0 };
+    state.records.unshift({
+      type: f.type,
+      createdAt: clock(new Date()),
+      duration: f.duration,
+      planned: state.planned,
+      content: text.slice(0, 500)
+    });
+    closeDialogs();
+    reset();
+    log((f.type === 'completed' ? '完成' : '中止') + '记录已保存（finishType=' + f.type + '，内容' + (text ? '非空' : '为空') + '）。');
+  }
+
+  function discardRecord(){
+    closeDialogs();
+    reset();
+    log('点击「放弃」→ 完全不生成任何记录，已回到空闲状态。');
+  }
+
+  /* ---------- 视图切换 ---------- */
+  function switchView(v){
+    state.view = v;
+    const isNormal = v === 'normal';
+    $('demoNormal').style.display = isNormal ? '' : 'none';
+    $('demoMiniWrap').style.display = isNormal ? 'none' : '';
+    const old = document.getElementById('demoToast');
+    if (old) { old.remove(); toastTimer = null; }
+    // 弹窗跟随当前视图
+    $('dOverlay').classList.add('hide');
+    $('dmOverlay').classList.add('hide');
+    if (state.finished) openDialog(state.finished.type);
+    render();
+    log('视图已切换为「' + (isNormal ? '正常视图' : '小视图') + '」，正在进行的倒计时与剩余时间完整保留。');
+  }
+
+  /* ---------- 事件绑定 ---------- */
+  $('dDurRow').addEventListener('click', e => {
+    const b = e.target.closest('.chip-btn');
+    if (!b || b.disabled) return;
+    if (b.id === 'dCustom') {
+      const v = prompt('请输入倒计时时长（分钟，1 ~ 240）：', String(Math.round(state.planned/60)));
+      if (v === null) return;
+      const n = parseInt(v, 10);
+      if (isNaN(n) || n < 1 || n > 240) { alert('请输入 1 ~ 240 之间的整数。'); return; }
+      state.planned = n*60; state.remain = n*60;
+      document.querySelectorAll('#dDurRow .chip-btn').forEach(x => x.classList.remove('sel'));
+      render();
+      log('已自定义时长为 ' + n + ' 分钟。');
+      return;
+    }
+    document.querySelectorAll('#dDurRow .chip-btn').forEach(x => x.classList.remove('sel'));
+    b.classList.add('sel');
+    const n = parseInt(b.dataset.min, 10);
+    state.planned = n*60;
+    state.remain = n*60;
+    render();
+    log('已设定本次倒计时时长为 ' + n + ' 分钟（未开始可随时修改）。');
+  });
+
+  $('dPinNormal').addEventListener('click', () => {
+    state.pinNormal = !state.pinNormal;
+    render();
+    log('正常视图置顶已' + (state.pinNormal ? '开启' : '关闭') + '（与小视图置顶状态相互独立）。');
+  });
+  $('dmPin').addEventListener('click', () => {
+    state.pinMini = !state.pinMini;
+    render();
+    log('小视图置顶已' + (state.pinMini ? '开启' : '关闭') + '（与正常视图置顶状态相互独立）。');
+  });
+
+  $('dToMini').addEventListener('click', () => switchView('mini'));
+  $('demoMini').addEventListener('dblclick', e => {
+    if (e.target.closest('button') || e.target.tagName === 'TEXTAREA') return;
+    switchView('normal');
+  });
+
+  $('fastMode').addEventListener('change', e => {
+    state.fastMode = e.target.checked;
+    log(state.fastMode
+      ? '已开启演示加速：计时满 10 秒即视为满足「5 分钟记录保护」，可快速体验中止流程。'
+      : '已关闭演示加速：恢复真实 5 分钟（300 秒）阈值。');
+  });
+  $('abortConfirm').addEventListener('change', e => {
+    state.abortConfirm = e.target.checked;
+    log('中止二次确认已' + (state.abortConfirm ? '开启' : '关闭') + '（对应设置项 abortConfirm）。');
+  });
+
+  $('dDlgText').addEventListener('input', e => { $('dDlgLen').textContent = e.target.value.length; });
+  $('dDlgSave').addEventListener('click', saveRecord);
+  $('dDlgDiscard').addEventListener('click', discardRecord);
+  $('dmDlgSave').addEventListener('click', saveRecord);
+  $('dmDlgDiscard').addEventListener('click', discardRecord);
+
+  render();
+})();
+</script>
+</body>
+</html>
+
+

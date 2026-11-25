@@ -1,0 +1,356 @@
+:root {
+  font-family: "Segoe UI", "Microsoft YaHei UI", sans-serif;
+  color: #252824;
+  background: #f2f1ed;
+  font-size: 14px;
+}
+* {
+  box-sizing: border-box;
+}
+body {
+  margin: 0;
+}
+#app {
+  width: 420px;
+  min-height: 540px;
+  margin: 24px auto;
+  background: #fffefa;
+  border: 1px solid #dedbd3;
+  border-radius: 12px;
+  overflow: hidden;
+}
+header {
+  height: 46px;
+  padding: 0 18px;
+  border-bottom: 1px solid #ece9e1;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+header strong {
+  font-size: 16px;
+  font-weight: 500;
+}
+header span {
+  font-size: 12px;
+  color: #92978e;
+}
+main {
+  padding: 28px 20px 12px;
+  text-align: center;
+}
+.ring {
+  width: 206px;
+  height: 206px;
+  margin: 0 auto 24px;
+  border-radius: 50%;
+  padding: 8px;
+  background: conic-gradient(#536b5b var(--progress, 100%), #ece9e1 0);
+}
+.ring > div {
+  height: 100%;
+  border-radius: 50%;
+  background: #fffefa;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+#time {
+  font-size: 46px;
+  font-variant-numeric: tabular-nums;
+  font-weight: 400;
+}
+#state {
+  font-size: 12px;
+  color: #666b64;
+  margin: 8px;
+}
+.presets {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  margin-bottom: 16px;
+}
+button {
+  font: inherit;
+  border: 1px solid #dedbd3;
+  background: #fffefa;
+  color: #666b64;
+  padding: 7px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+button:hover {
+  background: #e9eee9;
+}
+button:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+.selected,
+.primary {
+  background: #536b5b;
+  color: white;
+  border-color: #536b5b;
+}
+.primary:hover {
+  background: #46604f;
+}
+input,
+textarea {
+  font: inherit;
+  border: 1px solid #dedbd3;
+  border-radius: 6px;
+  background: #fffefa;
+  padding: 7px;
+  color: #252824;
+}
+input {
+  width: 70px;
+}
+label {
+  font-size: 12px;
+  color: #666b64;
+}
+.actions {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin: 22px 0 16px;
+}
+.actions button {
+  min-width: 110px;
+  padding: 10px;
+}
+.hint {
+  font-size: 12px;
+  color: #92978e;
+}
+footer {
+  padding: 12px 20px;
+  color: #a87532;
+  font-size: 12px;
+  min-height: 40px;
+}
+[data-state="running"] .ring {
+  background: conic-gradient(#3d7a58 var(--progress), #ece9e1 0);
+}
+[data-state="paused"] .ring {
+  background: conic-gradient(#a87532 var(--progress), #ece9e1 0);
+}
+[hidden] {
+  display: none !important;
+}
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid #536b5b;
+  outline-offset: 3px;
+}
+:root {
+  color-scheme: light;
+}
+.records {
+  border-top: 1px solid #dedbd3;
+  background: #f7f5f0;
+  padding: 16px 20px;
+  max-height: 320px;
+  overflow: auto;
+}
+.records-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.empty {
+  text-align: center;
+  color: #92978e;
+  font-size: 12px;
+  line-height: 2;
+  padding: 20px 0;
+}
+.group {
+  font-size: 12px;
+  color: #92978e;
+}
+article {
+  background: #fffefa;
+  border: 1px solid #ece9e1;
+  border-radius: 8px;
+  padding: 10px;
+  margin: 8px 0;
+}
+article p {
+  font-size: 12px;
+  margin: 4px 0 8px;
+}
+.content {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+article button {
+  font-size: 12px;
+  margin-right: 8px;
+  padding: 3px 8px;
+}
+dialog {
+  width: 360px;
+  max-width: calc(100vw - 24px);
+  border: 1px solid #dedbd3;
+  border-radius: 12px;
+  padding: 24px;
+  background: #fffefa;
+  color: #252824;
+}
+dialog::backdrop {
+  background: #25282455;
+}
+dialog h2 {
+  font-size: 18px;
+  font-weight: 500;
+  margin: 0 0 18px;
+}
+dialog p {
+  font-size: 12px;
+  color: #666b64;
+  overflow-wrap: anywhere;
+}
+dialog textarea {
+  display: block;
+  width: 100%;
+  resize: vertical;
+  margin-top: 8px;
+}
+#detail-text {
+  white-space: pre-wrap;
+}
+#error {
+  color: #b64e45;
+}
+body:has(dialog[open]) #toggle {
+  pointer-events: none;
+}
+header strong {
+  white-space: nowrap;
+}
+header span {
+  flex: 1;
+}
+header nav {
+  display: flex;
+  gap: 4px;
+}
+header nav button {
+  padding: 4px 7px;
+  font-size: 12px;
+}
+body[data-view="mini"] #app {
+  width: 220px;
+  min-height: 112px;
+  margin: 0;
+  border-radius: 0;
+}
+body[data-view="mini"] header {
+  height: 28px;
+  padding: 0 8px;
+  border: 0;
+}
+body[data-view="mini"] header strong,
+body[data-view="mini"] header span,
+body[data-view="mini"] #minimize,
+body[data-view="mini"] #quit {
+  display: none;
+}
+body[data-view="mini"] header nav {
+  margin-left: auto;
+}
+body[data-view="mini"] header nav button {
+  font-size: 10px;
+  padding: 2px 6px;
+}
+body[data-view="mini"] main {
+  padding: 0 10px;
+}
+body[data-view="mini"] .ring {
+  width: auto;
+  height: 38px;
+  background: none !important;
+  padding: 0;
+  margin: 0;
+}
+body[data-view="mini"] .ring > div {
+  display: block;
+}
+body[data-view="mini"] #time {
+  font-size: 30px;
+  line-height: 36px;
+}
+body[data-view="mini"] #state,
+body[data-view="mini"] .presets,
+body[data-view="mini"] main > label,
+body[data-view="mini"] .hint,
+body[data-view="mini"] .records {
+  display: none;
+}
+body[data-view="mini"] .actions {
+  margin: 5px 0 6px;
+  gap: 8px;
+}
+body[data-view="mini"] .actions button {
+  min-width: 60px;
+  font-size: 11px;
+  padding: 3px 10px;
+}
+body[data-view="mini"] footer {
+  font-size: 10px;
+  padding: 0 5px;
+  min-height: 0;
+}
+body[data-view="mini"]:has(dialog[open]) #app {
+  width: 100%;
+  height: 100vh;
+}
+body[data-view="mini"] dialog .actions button {
+  font-size: 13px;
+  padding: 7px 12px;
+}
+body[data-view="normal"] #app {
+  margin: 0 auto;
+  border-radius: 0;
+  width: min(420px, 100vw);
+}
+body[data-view="mini"] #time::before {
+  content: "";
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  margin-right: 9px;
+  border-radius: 50%;
+  vertical-align: middle;
+  background: #92978e;
+}
+body[data-view="mini"][data-state="running"] #time::before {
+  background: #3d7a58;
+}
+body[data-view="mini"][data-state="paused"] #time::before {
+  background: #a87532;
+}
+body[data-view="mini"] #notice:not(:empty) {
+  position: fixed;
+  inset: auto 0 0;
+  background: #f7f5f0;
+  line-height: 12px;
+}
+header {
+  user-select: none;
+  touch-action: none;
+}
+body[data-view="mini"] main {
+  user-select: none;
+  touch-action: none;
+}
+.selected:hover {
+  background: #46604f;
+  color: #fff;
+}
