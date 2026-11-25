@@ -1,35 +1,38 @@
 # koji
 
-Windows 专注计时应用，使用 Tauri 2 + Vite + JavaScript。
+Windows 专注计时应用，使用 **Tauri 2 + Vue 3 + Vite + JavaScript**。前端采用 Composition API 和 `<script setup>`，由 Vue 单文件组件组织界面。
 
 ## 先认识项目用到的技术
 
 可以把 koji 理解为“网页界面 + Windows 桌面窗口”。
 
-| 技术 / 工具           | 在本项目中的作用                                                                     |
-| --------------------- | ------------------------------------------------------------------------------------ |
-| HTML、CSS、JavaScript | 绘制界面，实现计时、记录、设置和视图切换；目前主要业务代码都在这里                   |
-| Vite                  | 前端开发服务器与构建工具，负责开发时刷新页面、构建时生成 `dist/`                     |
-| Tauri 2               | 把前端界面放进桌面窗口，并提供置顶、调整尺寸、移动窗口等系统能力                     |
-| WebView2              | Windows 上用于显示前端页面的系统 WebView 运行时                                      |
-| Rust                  | Tauri 桌面程序所用的编译型语言；当前 Rust 代码主要负责启动 Tauri，尚无自定义业务命令 |
-| Cargo                 | Rust 的依赖管理与构建工具，类似前端的 npm；Tauri CLI 会调用它编译桌面程序            |
-| rustup                | 安装和管理 Rust 工具链，包括 `rustc` 编译器与 Cargo                                  |
+| 技术 / 工具        | 在本项目中的作用                                                                     |
+| ------------------ | ------------------------------------------------------------------------------------ |
+| Vue 3 + JavaScript | 使用单文件组件、Composition API 和 `<script setup>` 管理界面、状态与事件             |
+| Vite               | 前端开发服务器与构建工具，负责开发时刷新页面、构建时生成 `dist/`                     |
+| Tauri 2            | 把前端界面放进桌面窗口，并提供置顶、调整尺寸、移动窗口等系统能力                     |
+| WebView2           | Windows 上用于显示前端页面的系统 WebView 运行时                                      |
+| Rust               | Tauri 桌面程序所用的编译型语言；当前 Rust 代码主要负责启动 Tauri，尚无自定义业务命令 |
+| Cargo              | Rust 的依赖管理与构建工具，类似前端的 npm；Tauri CLI 会调用它编译桌面程序            |
+| rustup             | 安装和管理 Rust 工具链，包括 `rustc` 编译器与 Cargo                                  |
+
+前端不使用 Router、Pinia 或组件库。应用只有一个页面，由根组件创建共享状态，子组件通过 props 接收数据、通过事件通知操作。
 
 当前调用关系：
 
 ```text
-src/main.js（界面与业务）
-  ├─ src/timer.js（计时状态机）
-  ├─ localStorage（记录与设置）
-  └─ @tauri-apps/api/window（窗口操作）
+index.html → src/main.js（挂载 Vue）→ src/App.vue（共享状态与组件编排）
+  ├─ components/（标题栏、计时面板、记录列表、弹窗）
+  ├─ composables/useTimer.js → timer.js（计时状态机）
+  ├─ composables/usePersistence.js → storage.js → localStorage
+  └─ composables/useWindow.js → @tauri-apps/api/window（窗口操作）
        ↓ Tauri IPC：前端与原生程序之间的通信
      Tauri / Rust 原生层
        ↓
      Windows 窗口
 ```
 
-修改计时、页面样式或记录功能时，可以先从 JavaScript 入手。只有需要新增前端 API 无法直接完成的原生能力时，再学习 Rust，并考虑增加 Tauri command。
+修改页面时，先看 `.vue` 文件：`<script setup>` 中编写 JavaScript 状态和事件方法，`<template>` 中用 Vue 模板绑定数据与交互。`composables/` 存放组合式函数，将计时、持久化和窗口操作从界面中拆出；`timer.js` 保持为不依赖 Vue 的计时核心。只有需要新增前端 API 无法直接完成的原生能力时，再学习 Rust，并考虑增加 Tauri command。
 
 ## 目录结构
 
@@ -40,9 +43,27 @@ koji/
 ├─ package.json                    # npm 依赖与开发命令
 ├─ package-lock.json               # npm 依赖锁文件，安装时使用 npm ci
 ├─ .gitignore                      # 排除依赖、构建产物等文件
+├─ vite.config.js                  # Vue 单文件组件插件与开发服务器配置
+├─ eslint.config.js                # Vue 脚本解析与函数 / 类成员空行规则
+├─ .prettierrc.json                 # Prettier 格式规则
+├─ .prettierignore                  # 不参与格式化的文件
+├─ .vscode/                        # 保存自动格式化配置与推荐扩展
 ├─ src/                            # 前端源代码
-│  ├─ main.js                      # 页面渲染、交互、记录、设置、窗口切换与拖动
+│  ├─ main.js                      # 导入全局样式并挂载 Vue 根组件
+│  ├─ App.vue                      # 创建共享状态、协调组件事件和弹窗流程
+│  ├─ components/
+│  │  ├─ TitleBar.vue              # 标题栏、置顶、视图切换与窗口操作按钮
+│  │  ├─ TimerPanel.vue            # 倒计时、时长输入与开始 / 暂停 / 中止操作
+│  │  ├─ RecordList.vue            # 记录排序分组、详情和删除入口
+│  │  └─ AppDialog.vue             # 填写记录、详情、删除确认和设置弹窗
+│  ├─ composables/
+│  │  ├─ useTimer.js               # 连接计时核心与 Vue 响应式状态，管理刷新周期
+│  │  ├─ usePersistence.js         # 管理记录和设置，写入成功后更新响应式数据
+│  │  └─ useWindow.js              # 原生窗口初始化、尺寸、位置、置顶和拖动
 │  ├─ style.css                    # 正常视图、小视图及弹窗样式
+│  ├─ format.js                    # 记录时间、持续时长和元信息格式化
+│  ├─ storage.js                   # 旧数据读取、默认设置、写入与记录保护规则
+│  ├─ storage.test.js              # 持久化成功 / 失败、数据兼容与记录边界测试
 │  ├─ timer.js                     # 计时状态机、有效专注时间与时间格式化
 │  └─ timer.test.js                # 使用 Node.js 内置测试工具验证计时逻辑
 ├─ src-tauri/                      # Rust / Tauri 桌面端工程
@@ -125,6 +146,8 @@ npm run tauri dev
 
 开发配置位于 `src-tauri/tauri.conf.json`：`beforeDevCommand` 自动执行 `npm run dev`，`devUrl` 指向 `http://127.0.0.1:5173`。运行此命令前，请先停止单独启动的 Vite，避免端口被占用。
 
+`vite.config.js` 使用 `@vitejs/plugin-vue` 编译 `.vue` 文件，并启用 `strictPort`：端口被占用时直接报错，不会自动换端口导致 Tauri 连接到错误的开发服务。
+
 ### 4. 只看界面时，使用浏览器预览
 
 ```powershell
@@ -136,26 +159,26 @@ npm run dev
 ### 5. 做一次小修改，了解开发流程
 
 1. 打开 `src/style.css`，修改按钮颜色或间距，保存后观察页面更新。
-2. 打开 `src/main.js`，查找“准备好，开始专注”，修改提示文案并保存。
+2. 打开 `src/components/TimerPanel.vue`，查找“准备好，开始专注”，修改模板中的提示文案并保存。
 3. 学习计时逻辑时，先读 `src/timer.js`，再看 `src/timer.test.js` 中暂停、继续和完成的例子。
 4. 涉及窗口操作的修改，用 `npm run tauri dev` 实测；切换视图后检查剩余时间、暂停状态、窗口尺寸和置顶是否正确。
 
-前端修改通常由 Vite 自动刷新。刷新页面会重新创建 JavaScript 计时状态，因此开发时修改文件可能中断正在运行的测试会话；记录与设置则从本地存储恢复。修改 Rust 源码通常会触发 Tauri 重新编译和重启。
+前端修改由 Vite 和 Vue 插件进行热更新；修改模板可能保留状态，但修改组件脚本、组合式函数或完整刷新页面可能重新创建计时状态，因此请勿依赖开发热更新保留正在运行的会话。记录与设置会从本地存储恢复。计时组合式函数在卸载时清理刷新定时器，窗口组合式函数清理窗口位置订阅及拖动状态。修改 Rust 源码通常会触发 Tauri 重新编译和重启。
 
 ### 6. 运行检查
 
 ```powershell
-# 计时核心单元测试
+# 计时与持久化单元测试
 npm test
 
 # 检查前端是否能构建
 npm run build
 
-# 检查前端和配置文件格式
-npx prettier --check src index.html package.json src-tauri/tauri.conf.json src-tauri/capabilities/default.json
+# 检查 ESLint 空行规则和 Prettier 格式
+npm run format:check
 ```
 
-`npm test` 当前覆盖 3 项计时逻辑测试。构建和单元测试不能替代真实窗口操作；逐阶段电脑验收记录见 [实施验证记录](docs/实施验证记录.md)。
+`npm test` 当前覆盖 7 项测试：3 项计时核心测试，4 项旧数据兼容、写入失败回退、记录生成边界及损坏数据保护测试。`npm run lint` 可单独检查 ESLint 规则，`npm run format` 可自动修复空行并格式化代码。构建和单元测试不能替代真实窗口操作；原 M1～M3 的电脑验收记录见 [实施验证记录](docs/实施验证记录.md)。
 
 ### 7. 生成可执行文件
 
@@ -175,21 +198,24 @@ npm run tauri build -- --no-bundle
 
 Tauri 构建会自动先执行 `npm run build`，再把前端资源编入桌面程序。构建前请关闭已运行的 `koji.exe`，否则 Windows 可能因文件被占用而报“拒绝访问”。调试版可能伴随控制台窗口；当前 Rust 入口为发布版配置了隐藏控制台。
 
-当前已验证的是 **debug 构建**。`bundle.active` 为 `false`，本阶段不生成 MSI / NSIS 安装包；安装包属于 M4。
+原 JavaScript 版本已验证 **debug 构建**；Vue 重构版已通过前端构建，最终 Tauri 构建与完整桌面回归验收仍待完成。`bundle.active` 为 `false`，本阶段不生成 MSI / NSIS 安装包；安装包属于 M4。
 
 ## 按需求找到修改位置
 
-| 想修改的内容                               | 优先查看                                         |
-| ------------------------------------------ | ------------------------------------------------ |
-| 计时规则、暂停时长计算、时间格式           | `src/timer.js`，并更新 `src/timer.test.js`       |
-| 记录生成、500 字限制、列表、设置、本地存储 | `src/main.js`                                    |
-| 页面颜色、布局、迷你视图和弹窗             | `src/style.css`                                  |
-| 双视图切换、置顶、位置记忆、指针拖动       | `src/main.js` 后半部分                           |
-| 默认窗口配置、开发地址、构建命令、CSP      | `src-tauri/tauri.conf.json`                      |
-| 原生 API 权限                              | `src-tauri/capabilities/default.json`            |
-| Rust 依赖 / 应用启动                       | `src-tauri/Cargo.toml` / `src-tauri/src/main.rs` |
+| 想修改的内容                          | 优先查看                                                                     |
+| ------------------------------------- | ---------------------------------------------------------------------------- |
+| 计时规则、暂停时长计算、时间格式      | `src/timer.js`、`src/composables/useTimer.js`，并更新 `src/timer.test.js`    |
+| 记录生成、500 字限制、弹窗流程        | `src/App.vue`、`src/components/AppDialog.vue`、`src/storage.js`              |
+| 页面颜色、布局、迷你视图和弹窗        | `src/style.css` 及 `src/components/` 中对应组件的模板                        |
+| 记录排序分组和详情入口                | `src/components/RecordList.vue`、`src/format.js`                             |
+| 设置与记录的本地持久化                | `src/composables/usePersistence.js`、`src/storage.js`、`src/storage.test.js` |
+| Vue 挂载、组件编排、开发服务器配置    | `src/main.js`、`src/App.vue`、`vite.config.js`                               |
+| 双视图切换、置顶、位置记忆、指针拖动  | `src/composables/useWindow.js`、`src/components/TitleBar.vue`                |
+| 默认窗口配置、开发地址、构建命令、CSP | `src-tauri/tauri.conf.json`                                                  |
+| 原生 API 权限                         | `src-tauri/capabilities/default.json`                                        |
+| Rust 依赖 / 应用启动                  | `src-tauri/Cargo.toml` / `src-tauri/src/main.rs`                             |
 
-注意：`tauri.conf.json` 的窗口尺寸是创建窗口时的初始配置；应用启动和视图切换时，`main.js` 还会设置实际尺寸。调整大小时需要同时检查这两处。增加原生窗口操作时，也要检查 capability 是否允许对应 API。
+注意：`tauri.conf.json` 的窗口尺寸是创建窗口时的初始配置；应用启动和视图切换时，`useWindow.js` 还会设置实际尺寸。调整大小时需要同时检查这两处。增加原生窗口操作时，也要检查 capability 是否允许对应 API。
 
 ## 常见问题
 
@@ -232,7 +258,9 @@ npm run format:check
 
 已实现 M1 计时、M2 记录与设置、M3 双视图窗口代码。逐阶段电脑验证结果见 `docs/实施验证记录.md`。
 
-计时核心按单调时钟的实际差值计算，不以 interval 次数累计；单元测试覆盖暂停排除、完成优先、时间格式边界。记录与设置保存在当前用户 WebView 的本地存储中。浏览器预览与桌面程序的数据相互独立；置顶、拖动和位置恢复仅在 Tauri 中生效。
+前端已迁移为 Vue 3 组件和组合式函数。重构期间已实测计时流程、记录保存 / 放弃 / 详情 / 授权删除、设置与刷新保留、原生视图切换、正常窗口拖动和小窗完成填写框。置顶实际遮挡、重启恢复及生产构建旧数据兼容尚未完成本轮复测，原阶段记录不代表 Vue 重构版已全部验收。
+
+计时核心按单调时钟的实际差值计算，不以 interval 次数累计；单元测试覆盖暂停排除、完成优先、时间格式边界。记录与设置保存在当前用户 WebView 的 `localStorage` 中，沿用键名 `koji` 和 `{ settings, records }` 结构，Vue 迁移无需手动转换数据。写入失败时保留原有记录、设置和弹窗输入，并提示重试。浏览器预览、Tauri 开发模式和生产程序可能使用不同的存储来源；置顶、拖动和位置恢复仅在 Tauri 中生效。
 
 正常视图和小视图使用同一个 WebView，通过调整窗口尺寸切换，共享内存中的计时状态；两种形态分别记忆置顶设置与物理屏幕坐标。小视图填写记录时临时扩大窗口，关闭弹窗后恢复。
 
