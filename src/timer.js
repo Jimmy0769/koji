@@ -5,6 +5,7 @@ export class Timer {
     this.planned = 1500;
     this.elapsed = 0;
   }
+
   get spent() {
     return Math.min(
       this.planned,
@@ -12,9 +13,11 @@ export class Timer {
         (this.state === "running" ? (this.now() - this.anchor) / 1000 : 0),
     );
   }
+
   get remaining() {
     return Math.max(0, this.planned - this.spent);
   }
+
   start(minutes) {
     if (this.state !== "idle") return;
     this.planned = minutes * 60;
@@ -23,16 +26,19 @@ export class Timer {
     this.anchor = this.now();
     this.state = "running";
   }
+
   pause() {
     if (this.state !== "running") return;
     this.elapsed = this.spent;
     this.state = "paused";
   }
+
   resume() {
     if (this.state !== "paused") return;
     this.anchor = this.now();
     this.state = "running";
   }
+
   finish() {
     if (this.state === "idle") return null;
     const duration = Math.floor(this.spent);
@@ -50,6 +56,7 @@ export class Timer {
     };
   }
 }
+
 export function formatTime(seconds) {
   const n = Math.ceil(seconds);
   const s = String(n % 60).padStart(2, "0");

@@ -204,6 +204,30 @@ Tauri 构建会自动先执行 `npm run build`，再把前端资源编入桌面�
 | 重新打开后计时回到初始值           | 当前只持久化记录、设置及窗口偏好；退出进程后不会恢复未完成会话                                                    |
 | 浏览器里有记录，桌面程序里没有     | 两者使用独立存储空间；不要把网页预览的数据当成桌面数据                                                            |
 
+## VS Code 保存时自动格式化
+
+项目已提供 `.vscode/settings.json`、Prettier 和 ESLint 配置。用 VS Code 打开项目根目录后，在扩展面板安装推荐扩展：
+
+- **Vue - Official**（`Vue.volar`）：Vue 3 单文件组件支持。
+- **Prettier - Code formatter**（`esbenp.prettier-vscode`）：统一缩进、引号、换行等格式。
+- **ESLint**（`dbaeumer.vscode-eslint`）：自动补齐函数声明、类方法之间的空行，支持 `.js`、`.mjs` 和 `.vue` 的脚本部分。
+
+先运行 `npm ci` 安装项目依赖，然后编辑文件并按 **Ctrl+S**。保存时会执行 ESLint 自动修复和 Prettier 格式化。扩展推荐本身不会自动安装扩展；如果保存没有效果，请确认上述扩展已安装且在当前工作区启用，并查看 VS Code 的“输出 → ESLint / Prettier”日志。
+
+Prettier 通常保留已有空行，但不会主动在每个函数之间插入空行，因此这里额外使用 `@stylistic` 的 ESLint 规则。规则要求函数声明前后、导出声明之间以及类成员之间至少有一个空行；Prettier 会把多余的连续空行收敛为一行。箭头函数变量和对象字面量方法不在这组空行规则的覆盖范围内。
+
+也可以在终端执行：
+
+```powershell
+# 自动修复空行并统一格式
+npm run format
+
+# 只检查，不修改文件
+npm run format:check
+```
+
+这些命令覆盖前端代码、项目脚本及相关配置，不会格式化 Rust 编译产物和原型 HTML。
+
 ## 阶段状态
 
 已实现 M1 计时、M2 记录与设置、M3 双视图窗口代码。逐阶段电脑验证结果见 `docs/实施验证记录.md`。

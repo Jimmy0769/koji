@@ -354,3 +354,6 @@ body[data-view="mini"] main {
   background: #46604f;
   color: #fff;
 }
+.dialog-error {
+  color: #b64e45;
+}
